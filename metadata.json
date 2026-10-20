@@ -1,0 +1,6 @@
+{
+  "name": "Muba Gadgets",
+  "description": "Premium smart gadgets, TWS earbuds, smartwatches, power banks, and tech accessories with nationwide cash on delivery in Bangladesh.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -627,7 +627,7 @@ function MainApp() {
                         <ProductCard
                           product={product}
                           onAddToCart={(p) => handleAddToCart(p)}
-                          onOrderNow={(p) => handleOrderNow(p, 1)}
+                          onOrderNow={(p) => navigateToProduct(p)}
                           onSelectProduct={navigateToProduct}
                           onToggleWishlist={handleToggleWishlist}
                           isWishlisted={wishlist.includes(product.id)}
@@ -671,7 +671,7 @@ function MainApp() {
                     key={product.id}
                     product={product}
                     onAddToCart={(p) => handleAddToCart(p)}
-                    onOrderNow={(p) => handleOrderNow(p, 1)}
+                    onOrderNow={(p) => navigateToProduct(p)}
                     onSelectProduct={navigateToProduct}
                     onToggleWishlist={handleToggleWishlist}
                     isWishlisted={wishlist.includes(product.id)}
@@ -731,7 +731,7 @@ function MainApp() {
                     key={product.id}
                     product={product}
                     onAddToCart={(p) => handleAddToCart(p)}
-                    onOrderNow={(p) => handleOrderNow(p, 1)}
+                    onOrderNow={(p) => navigateToProduct(p)}
                     onSelectProduct={navigateToProduct}
                     onToggleWishlist={handleToggleWishlist}
                     isWishlisted={wishlist.includes(product.id)}

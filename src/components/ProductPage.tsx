@@ -637,7 +637,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({
                   key={relProduct.id}
                   product={relProduct}
                   onAddToCart={(p) => onAddToCart(p, 1)}
-                  onOrderNow={(p) => onOrderNow(p, 1)}
+                  onOrderNow={(p) => { if (onSelectProduct) onSelectProduct(p); }}
                   onSelectProduct={(p) => {
                     if (onSelectProduct) {
                       onSelectProduct(p);

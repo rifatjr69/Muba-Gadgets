@@ -136,8 +136,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               e.stopPropagation();
               if (onOrderNow) {
                 onOrderNow(product);
-              } else {
-                onAddToCart(product);
               }
             }}
             className="flex-1 py-1.5 sm:py-2 px-2.5 rounded border border-[#B84040] text-[#B84040] hover:bg-[#B84040] hover:text-white active:scale-[0.98] transition-all duration-200 text-[11px] sm:text-xs font-semibold tracking-wider uppercase flex items-center justify-center cursor-pointer select-none"

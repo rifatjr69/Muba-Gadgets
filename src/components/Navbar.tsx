@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
-  ShoppingBag, Search, Heart, User, ShieldCheck, Phone, Menu, X,
+  ShoppingCart, Search, Heart, User, ShieldCheck, Phone, Menu, X,
   Sparkles, PackageCheck, ChevronRight
 } from 'lucide-react';
 import { Product, CartItem, Category } from '../types';
@@ -27,22 +27,23 @@ interface NavbarProps {
 }
 
 const HOTLINE = '01887816106';
+const MAROON = '#7A1F3D';
 const NO_SCROLLBAR = '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden';
 
 /* ------------------------------------------------------------------ */
-/* Search box (desktop + mobile দুই জায়গায় ব্যবহার হয়)                 */
+/* Search box                                                          */
 /* ------------------------------------------------------------------ */
 const SearchBox: React.FC<{
   products: Product[];
   onSelect: (p: Product) => void;
   placeholder: string;
+  autoFocus?: boolean;
   className?: string;
-}> = ({ products, onSelect, placeholder, className = '' }) => {
+}> = ({ products, onSelect, placeholder, autoFocus, className = '' }) => {
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  // বাইরে ক্লিক বা Esc চাপলে dropdown বন্ধ হবে
   useEffect(() => {
     const onDown = (e: MouseEvent | TouchEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
@@ -79,11 +80,12 @@ const SearchBox: React.FC<{
         type="text"
         inputMode="search"
         enterKeyHint="search"
+        autoFocus={autoFocus}
         placeholder={placeholder}
         value={q}
         onChange={(e) => { setQ(e.target.value); setOpen(true); }}
         onFocus={() => setOpen(true)}
-        className="w-full h-10 sm:h-11 bg-gray-100 border border-transparent rounded-full pl-10 pr-10 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0052FF]/40 focus:border-[#0052FF] focus:bg-white transition"
+        className="w-full h-11 bg-gray-50 border border-gray-200 rounded-full pl-10 pr-10 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#7A1F3D] focus:bg-white transition"
       />
       {q && (
         <button
@@ -118,7 +120,9 @@ const SearchBox: React.FC<{
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-900 truncate">{product.name}</p>
-                    <p className="text-xs font-bold text-[#0052FF]">৳{Number(product.price || 0).toLocaleString()}</p>
+                    <p className="text-xs font-bold" style={{ color: MAROON }}>
+                      ৳{Number(product.price || 0).toLocaleString()}
+                    </p>
                   </div>
                   <ChevronRight className="w-4 h-4 text-gray-300 shrink-0" />
                 </button>
@@ -154,7 +158,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   setSelectedCategory,
   isAdmin
 }) => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const activeNavCategories = useMemo(() => {
     return [...(categories || [])]
@@ -167,40 +172,37 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const goHome = () => { setActiveTab('home'); setSelectedCategory('all'); };
   const goCategory = (slug: string) => { setActiveTab('shop'); setSelectedCategory(slug); };
-  const closeMenu = () => setMobileMenuOpen(false);
+  const closeMenu = () => setMenuOpen(false);
 
-  // মোবাইল মেনু খোলা থাকলে ব্যাকগ্রাউন্ড স্ক্রল বন্ধ থাকবে
+  // মেনু খোলা থাকলে ব্যাকগ্রাউন্ড স্ক্রল বন্ধ
   useEffect(() => {
-    if (!mobileMenuOpen) return;
+    if (!menuOpen) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = prev; };
-  }, [mobileMenuOpen]);
+  }, [menuOpen]);
 
-  // স্ক্রিন বড় হলে বা Esc চাপলে মেনু বন্ধ
   useEffect(() => {
-    const onResize = () => { if (window.innerWidth >= 768) setMobileMenuOpen(false); };
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileMenuOpen(false); };
-    window.addEventListener('resize', onResize);
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.removeEventListener('resize', onResize);
-      window.removeEventListener('keydown', onKey);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setMenuOpen(false); setSearchOpen(false); }
     };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  // Brand logo (আগের মতোই অপরিবর্তিত)
   const Logo = ({ size = 'md' }: { size?: 'md' | 'lg' }) => (
-    <span className="flex items-center gap-2.5 text-left">
-      <span className={`relative shrink-0 rounded-xl bg-[#0052FF] flex items-center justify-center text-white shadow-md shadow-[#0052FF]/30 ${size === 'lg' ? 'w-11 h-11' : 'w-9 h-9 sm:w-11 sm:h-11'}`}>
-        <span className="text-xl sm:text-2xl font-extrabold tracking-tighter leading-none">M</span>
-        <span className="absolute -bottom-1 -right-1 bg-[#00E5FF] rounded-full p-0.5 text-blue-950">
-          <ShieldCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-[#00E5FF] text-blue-950" />
+    <span className="flex items-center gap-2 sm:gap-2.5 text-left">
+      <span className={`relative shrink-0 rounded-xl bg-[#B84040] flex items-center justify-center text-white shadow-md ${size === 'lg' ? 'w-11 h-11' : 'w-8 h-8 sm:w-10 sm:h-10'}`}>
+        <span className="text-lg sm:text-xl font-extrabold tracking-tighter leading-none">M</span>
+        <span className="absolute -bottom-1 -right-1 bg-[#7A1F3D] rounded-full p-0.5 text-white">
+          <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-white text-[#7A1F3D]" />
         </span>
       </span>
       <span className="leading-tight min-w-0">
         <span className="flex items-center gap-1 whitespace-nowrap">
-          <span className="text-base sm:text-xl font-black text-gray-900 tracking-tight">Muba</span>
-          <span className="text-base sm:text-xl font-black text-[#0052FF] tracking-tight">Gadgets</span>
+          <span className="text-[15px] sm:text-xl font-black text-gray-900 tracking-tight">Muba</span>
+          <span className="text-[15px] sm:text-xl font-black text-[#7A1F3D] tracking-tight">Gadgets</span>
         </span>
         <span className="hidden sm:flex items-center gap-1 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">
           Verified Store <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -209,216 +211,135 @@ export const Navbar: React.FC<NavbarProps> = ({
     </span>
   );
 
-  const iconBtn = 'relative inline-flex items-center justify-center w-10 h-10 rounded-xl text-gray-700 hover:text-[#0052FF] hover:bg-gray-100 active:bg-gray-200 transition';
+  const iconBtn =
+    'relative inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full text-gray-900 hover:bg-gray-100 active:bg-gray-200 transition';
+  const badge =
+    'absolute top-0 right-0 text-white text-[10px] font-bold min-w-[17px] h-[17px] px-1 rounded-full flex items-center justify-center';
 
   return (
     <>
-      {/* ============ Top info bar (স্ক্রলের সাথে উপরে চলে যাবে) ============ */}
-      <div className="bg-[#0052FF] text-white text-[11px] sm:text-xs">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-8 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="hidden sm:inline-flex items-center gap-1 bg-white/20 px-2 py-0.5 rounded-full font-medium shrink-0">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#00E5FF]" /> 100% Verified Original
-            </span>
-            <span className="truncate font-medium">⚡ সারা বাংলাদেশে ক্যাশ অন ডেলিভারি</span>
-          </div>
-          <a href={`tel:${HOTLINE}`} className="flex items-center gap-1 shrink-0 font-semibold hover:text-[#00E5FF] transition">
-            <Phone className="w-3.5 h-3.5" />
-            <span className="hidden min-[380px]:inline">Hotline:</span> {HOTLINE}
-          </a>
-        </div>
-      </div>
-
       {/* ============================ Sticky header ============================ */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
+      <header className="sticky top-0 z-40 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14 sm:h-16 lg:h-20 gap-2 sm:gap-4">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center h-14 sm:h-16 gap-2">
 
-            {/* Left: Hamburger (mobile) + Logo */}
-            <div className="flex items-center gap-1 sm:gap-2 min-w-0">
+            {/* Left: hamburger */}
+            <div className="flex items-center justify-start">
               <button
                 type="button"
-                onClick={() => setMobileMenuOpen(true)}
+                onClick={() => setMenuOpen(true)}
                 aria-label="Open menu"
-                className={`${iconBtn} md:hidden -ml-1.5`}
+                className={`${iconBtn} -ml-1.5`}
               >
-                <Menu className="w-6 h-6" />
-              </button>
-              <button
-                type="button"
-                onClick={goHome}
-                aria-label="Muba Gadgets Home"
-                className="group focus:outline-none min-w-0"
-              >
-                <span className="block group-hover:scale-[1.02] transition-transform origin-left">
-                  <Logo />
-                </span>
+                <Menu className="w-6 h-6" strokeWidth={1.6} />
               </button>
             </div>
 
-            {/* Center: Search (desktop) */}
-            <div className="hidden md:flex flex-1 max-w-xl">
-              <SearchBox
-                products={products}
-                onSelect={onSelectProduct}
-                placeholder="স্মার্টওয়াচ, ইয়ারবাড বা পাওয়ার ব্যাংক খুঁজুন..."
-              />
-            </div>
+            {/* Center: brand logo */}
+            <button
+              type="button"
+              onClick={goHome}
+              aria-label="Muba Gadgets Home"
+              className="focus:outline-none min-w-0"
+            >
+              <Logo />
+            </button>
 
-            {/* Right: Actions */}
-            <div className="flex items-center gap-0.5 sm:gap-2 shrink-0">
+            {/* Right: search / heart / cart (/ account on desktop) */}
+            <div className="flex items-center justify-end">
               <button
                 type="button"
-                onClick={onOpenAiAdvisor}
-                className="hidden lg:inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 text-[#0052FF] px-3 h-10 rounded-xl text-xs font-bold hover:shadow-md transition"
-                title="AI Gadget Recommendation"
+                onClick={() => setSearchOpen((s) => !s)}
+                aria-label="Search"
+                className={iconBtn}
               >
-                <Sparkles className="w-4 h-4" />
-                <span>AI গাইড</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={onOpenTracking}
-                className="hidden md:inline-flex items-center gap-1.5 px-2.5 h-10 rounded-xl text-gray-600 hover:text-[#0052FF] hover:bg-gray-100 transition text-xs font-semibold"
-                title="অর্ডার ট্র্যাক করুন"
-              >
-                <PackageCheck className="w-5 h-5" />
-                <span className="hidden xl:inline">ট্র্যাকিং</span>
+                {searchOpen ? <X className="w-[22px] h-[22px]" strokeWidth={1.6} /> : <Search className="w-[22px] h-[22px]" strokeWidth={1.6} />}
               </button>
 
               <button type="button" onClick={onOpenWishlist} className={iconBtn} title="পছন্দের তালিকা" aria-label="Wishlist">
-                <Heart className="w-[22px] h-[22px]" />
+                <Heart className="w-[22px] h-[22px]" strokeWidth={1.6} />
                 {wishlist.length > 0 && (
-                  <span className="absolute top-0.5 right-0.5 bg-rose-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center shadow ring-2 ring-white">
+                  <span className={badge} style={{ background: MAROON }}>
                     {wishlist.length > 99 ? '99+' : wishlist.length}
                   </span>
                 )}
               </button>
 
-              <button
-                type="button"
-                onClick={onOpenCart}
-                aria-label="Cart"
-                className="relative inline-flex items-center gap-2 bg-[#0052FF] hover:bg-blue-700 active:bg-blue-800 text-white w-10 h-10 sm:w-auto sm:px-4 justify-center rounded-xl font-bold shadow-md shadow-[#0052FF]/25 transition ml-1"
-              >
-                <ShoppingBag className="w-5 h-5" />
-                <span className="hidden sm:inline text-xs">কার্ট</span>
+              <button type="button" onClick={onOpenCart} aria-label="Cart" className={`${iconBtn} -mr-1.5 sm:mr-0`}>
+                <ShoppingCart className="w-[22px] h-[22px]" strokeWidth={1.6} />
                 {totalCartItems > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-[#00E5FF] text-blue-950 font-extrabold text-[10px] min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center shadow ring-2 ring-white">
+                  <span className={badge} style={{ background: MAROON }}>
                     {totalCartItems > 99 ? '99+' : totalCartItems}
                   </span>
                 )}
               </button>
 
-              {isAdmin ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={onOpenAdmin}
-                    aria-label="Admin panel"
-                    className={`${iconBtn} md:hidden !text-purple-700 !bg-purple-50`}
-                  >
-                    <User className="w-[22px] h-[22px]" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onOpenAdmin}
-                    className="hidden md:inline-flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white px-3 h-10 rounded-xl text-xs font-bold shadow transition"
-                  >
-                    <User className="w-4 h-4" />
-                    <span className="hidden lg:inline">অ্যাডমিন প্যানেল</span>
-                    <span className="lg:hidden">অ্যাডমিন</span>
-                  </button>
-                </>
-              ) : (
-                <button type="button" onClick={onOpenAuth} className={iconBtn} title="লগইন / একাউন্ট" aria-label="Account">
-                  <User className="w-[22px] h-[22px]" />
-                </button>
-              )}
+              {/* Account: শুধু desktop এ (মোবাইলে মেনুর ভেতরে আছে) */}
+              <button
+                type="button"
+                onClick={isAdmin ? onOpenAdmin : onOpenAuth}
+                aria-label={isAdmin ? 'Admin panel' : 'Account'}
+                title={isAdmin ? 'অ্যাডমিন প্যানেল' : 'লগইন / একাউন্ট'}
+                className={`${iconBtn} hidden md:inline-flex`}
+                style={isAdmin ? { color: MAROON } : undefined}
+              >
+                <User className="w-[22px] h-[22px]" strokeWidth={1.6} />
+              </button>
             </div>
-          </div>
-
-          {/* Mobile search row */}
-          <div className="pb-2.5 md:hidden">
-            <SearchBox
-              products={products}
-              onSelect={onSelectProduct}
-              placeholder="স্মার্টওয়াচ, ইয়ারবাড খুঁজুন..."
-            />
           </div>
         </div>
 
+        {/* Search panel (সার্চ আইকনে চাপলে নিচে খুলবে) */}
+        {searchOpen && (
+          <div className="border-t border-gray-100 bg-white px-3 sm:px-6 py-3">
+            <div className="max-w-2xl mx-auto">
+              <SearchBox
+                autoFocus
+                products={products}
+                onSelect={(p) => { onSelectProduct(p); setSearchOpen(false); }}
+                placeholder="স্মার্টওয়াচ, ইয়ারবাড বা পাওয়ার ব্যাংক খুঁজুন..."
+              />
+            </div>
+          </div>
+        )}
+
         {/* Desktop category sub-bar */}
-        <div className="bg-gray-50 border-t border-gray-100 hidden md:block">
+        <div className="border-t border-gray-100 hidden md:block">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-11 text-sm font-semibold text-gray-700 gap-6">
-              <nav className={`flex items-center gap-6 overflow-x-auto whitespace-nowrap h-full ${NO_SCROLLBAR}`}>
+            <nav className={`flex items-center gap-7 overflow-x-auto whitespace-nowrap h-11 text-xs font-bold uppercase tracking-wider text-gray-600 ${NO_SCROLLBAR}`}>
+              <button
+                type="button"
+                onClick={goHome}
+                className={`h-full border-b-2 transition ${isHome ? 'border-[#7A1F3D] text-[#7A1F3D]' : 'border-transparent hover:text-[#7A1F3D]'}`}
+              >
+                হোম
+              </button>
+              {activeNavCategories.map((cat) => (
                 <button
                   type="button"
-                  onClick={goHome}
-                  className={`h-full border-b-2 transition ${isHome ? 'text-[#0052FF] font-bold border-[#0052FF]' : 'border-transparent hover:text-[#0052FF]'}`}
+                  key={cat.id || cat.slug}
+                  onClick={() => goCategory(cat.slug)}
+                  className={`h-full border-b-2 transition ${selectedCategory === cat.slug ? 'border-[#7A1F3D] text-[#7A1F3D]' : 'border-transparent hover:text-[#7A1F3D]'}`}
                 >
-                  হোম
+                  {cat.name_bn || cat.name}
                 </button>
-                {activeNavCategories.map((cat) => (
-                  <button
-                    type="button"
-                    key={cat.id || cat.slug}
-                    onClick={() => goCategory(cat.slug)}
-                    className={`h-full border-b-2 transition ${selectedCategory === cat.slug ? 'text-[#0052FF] font-bold border-[#0052FF]' : 'border-transparent hover:text-[#0052FF]'}`}
-                  >
-                    {cat.name_bn || cat.name}
-                  </button>
-                ))}
-              </nav>
-
-              <div className="hidden xl:flex items-center gap-3 text-xs font-bold text-gray-500 shrink-0">
-                <span className="flex items-center gap-1 text-[#0052FF]">
-                  <Sparkles className="w-3.5 h-3.5" /> ১০০% আসল প্রডাক্ট
-                </span>
-                <span>•</span>
-                <span>৭ দিনের রিপ্লেসমেন্ট গ্যারান্টি</span>
-              </div>
-            </div>
+              ))}
+            </nav>
           </div>
         </div>
       </header>
 
-      {/* ============ Mobile category chips (স্ক্রলের সাথে চলে যাবে) ============ */}
-      <div className="md:hidden bg-white border-b border-gray-100">
-        <div className={`flex items-center gap-2 overflow-x-auto px-3 py-2.5 ${NO_SCROLLBAR}`}>
-          <button
-            type="button"
-            onClick={goHome}
-            className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition ${isHome ? 'bg-[#0052FF] text-white border-[#0052FF] shadow-sm' : 'bg-white text-gray-700 border-gray-200'}`}
-          >
-            হোম
-          </button>
-          {activeNavCategories.map((cat) => (
-            <button
-              type="button"
-              key={cat.id || cat.slug}
-              onClick={() => goCategory(cat.slug)}
-              className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border whitespace-nowrap transition ${selectedCategory === cat.slug ? 'bg-[#0052FF] text-white border-[#0052FF] shadow-sm' : 'bg-white text-gray-700 border-gray-200'}`}
-            >
-              {cat.name_bn || cat.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ============================ Mobile drawer ============================ */}
+      {/* ============================ Slide-in drawer ============================ */}
       <div
-        className={`md:hidden fixed inset-0 z-[60] ${mobileMenuOpen ? '' : 'pointer-events-none'}`}
-        aria-hidden={!mobileMenuOpen}
+        className={`fixed inset-0 z-[60] ${menuOpen ? '' : 'pointer-events-none'}`}
+        aria-hidden={!menuOpen}
       >
         <div
           onClick={closeMenu}
-          className={`absolute inset-0 bg-black/50 backdrop-blur-[2px] transition-opacity duration-200 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute inset-0 bg-black/50 transition-opacity duration-200 ${menuOpen ? 'opacity-100' : 'opacity-0'}`}
         />
         <aside
-          className={`absolute inset-y-0 left-0 w-[85%] max-w-sm bg-white shadow-2xl flex flex-col transition-transform duration-250 ease-out ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
+          className={`absolute inset-y-0 left-0 w-[85%] max-w-sm bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
           <div className="flex items-center justify-between px-4 h-16 border-b border-gray-100 shrink-0">
             <Logo size="lg" />
@@ -426,7 +347,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               type="button"
               onClick={closeMenu}
               aria-label="Close menu"
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-gray-500 hover:bg-gray-100 transition"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition"
             >
               <X className="w-6 h-6" />
             </button>
@@ -438,7 +359,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => { goHome(); closeMenu(); }}
-              className={`w-full flex items-center justify-between py-3 px-3 rounded-xl text-sm font-semibold transition ${isHome ? 'bg-blue-50 text-[#0052FF] font-bold' : 'text-gray-800 hover:bg-gray-50'}`}
+              className={`w-full flex items-center justify-between py-3 px-3 rounded-xl text-sm font-semibold transition ${isHome ? 'bg-rose-50 text-[#7A1F3D] font-bold' : 'text-gray-800 hover:bg-gray-50'}`}
             >
               <span>হোম পেজ (Home)</span>
               <ChevronRight className="w-4 h-4 opacity-50" />
@@ -449,7 +370,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 type="button"
                 key={cat.id || cat.slug}
                 onClick={() => { goCategory(cat.slug); closeMenu(); }}
-                className={`w-full flex items-center justify-between gap-2 py-3 px-3 rounded-xl text-sm font-semibold transition ${selectedCategory === cat.slug ? 'bg-blue-50 text-[#0052FF] font-bold' : 'text-gray-800 hover:bg-gray-50'}`}
+                className={`w-full flex items-center justify-between gap-2 py-3 px-3 rounded-xl text-sm font-semibold transition ${selectedCategory === cat.slug ? 'bg-rose-50 text-[#7A1F3D] font-bold' : 'text-gray-800 hover:bg-gray-50'}`}
               >
                 <span className="min-w-0 text-left truncate">
                   {cat.name_bn || cat.name}
@@ -467,7 +388,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => { onOpenAiAdvisor(); closeMenu(); }}
-              className="w-full flex items-center gap-3 py-3 px-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-blue-50 to-indigo-50 text-[#0052FF]"
+              className="w-full flex items-center gap-3 py-3 px-3 rounded-xl text-sm font-semibold bg-rose-50 text-[#7A1F3D]"
             >
               <Sparkles className="w-5 h-5" /> AI গ্যাজেট এডভাইজর
             </button>
@@ -485,7 +406,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <span className="flex items-center gap-3"><Heart className="w-5 h-5 text-gray-500" /> পছন্দের তালিকা</span>
               {wishlist.length > 0 && (
-                <span className="bg-rose-500 text-white text-[11px] font-bold min-w-[20px] h-5 px-1.5 rounded-full flex items-center justify-center">{wishlist.length}</span>
+                <span className="text-white text-[11px] font-bold min-w-[20px] h-5 px-1.5 rounded-full flex items-center justify-center" style={{ background: MAROON }}>
+                  {wishlist.length}
+                </span>
               )}
             </button>
             {isAdmin ? (
@@ -510,12 +433,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="p-4 border-t border-gray-100 shrink-0 space-y-2.5 bg-gray-50/70">
             <a
               href={`tel:${HOTLINE}`}
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#0052FF] text-white text-sm font-bold shadow-md shadow-[#0052FF]/25"
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-full text-white text-sm font-bold"
+              style={{ background: MAROON }}
             >
               <Phone className="w-4 h-4" /> কল করুন: {HOTLINE}
             </a>
             <p className="text-center text-[11px] text-gray-500 font-medium">
-              ১০০% আসল প্রডাক্ট • ৭ দিনের রিপ্লেসমেন্ট গ্যারান্টি
+              ⚡ সারা বাংলাদেশে ক্যাশ অন ডেলিভারি • ১০০% আসল প্রডাক্ট
             </p>
           </div>
         </aside>

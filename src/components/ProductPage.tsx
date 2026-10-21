@@ -367,7 +367,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({
               <button
                 type="button"
                 onClick={() => onOrderNow(product, quantity, selectedVariant)}
-                className="flex-1 bg-[#0052FF] hover:bg-blue-700 active:scale-[0.98] text-white font-extrabold h-13 px-6 rounded-2xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-sm sm:text-base transition cursor-pointer"
+                className="flex-1 bg-[#B84040] hover:bg-blue-700 active:scale-[0.98] text-white font-extrabold h-13 px-6 rounded-2xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-sm sm:text-base transition cursor-pointer"
               >
                 <Zap className="w-4 h-4 fill-white" />
                 <span>Order Now</span>
@@ -674,7 +674,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({
           </button>
           <button
             onClick={() => onOrderNow(product, quantity, selectedVariant)}
-            className="bg-[#0052FF] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 flex items-center gap-1.5 active:scale-95"
+            className="bg-[#B84040] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 flex items-center gap-1.5 active:scale-95"
           >
             <Zap className="w-3.5 h-3.5 fill-white" />
             <span>Order Now</span>

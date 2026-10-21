@@ -13,9 +13,14 @@ import { AdminDashboard, getCategoryIconComponent } from './components/AdminDash
 import { HeroSlider } from './components/HeroSlider';
 import { SqlModal } from './components/SqlModal';
 import { MOCK_PRODUCTS, MOCK_CATEGORIES, MOCK_BANNERS, MOCK_DELIVERY_ZONES, MOCK_COUPONS } from './data/mockProducts';
-import { Product, CartItem, DeliveryZone, Order, Category, enrichProducts } from './types';
+import { Product, CartItem, DeliveryZone, Category, enrichProducts } from './types';
 import { supabase } from './lib/supabase';
-import { Sparkles, ShieldCheck, Truck, RefreshCw, Star, ChevronRight, ChevronLeft, ArrowRight, Zap, Flame, Award, Headphones, Watch, BatteryCharging, AlertTriangle, Package } from 'lucide-react';
+import { ArrowRight, Flame, AlertTriangle, Package } from 'lucide-react';
+
+// ---- Theme (HELLO-style maroon) ----
+const MAROON = '#7A1F3D';
+const MAROON_DARK = '#5E1630';
+const PINK_SOFT = '#FCE8EC';
 
 // Error Boundary to prevent white screen crashes
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
@@ -26,7 +31,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Uncaught error:", error, errorInfo);
+    console.error('Uncaught error:', error, errorInfo);
   }
 
   render() {
@@ -43,7 +48,8 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="w-full bg-[#0052FF] text-white font-bold py-3 rounded-xl text-xs shadow hover:bg-blue-700 transition"
+              className="w-full text-white font-bold py-3 rounded-xl text-xs shadow transition hover:opacity-90"
+              style={{ background: MAROON }}
             >
               পেজ রিফ্রেশ করুন
             </button>
@@ -73,12 +79,12 @@ function MainApp() {
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
-  
+
   const [activeTab, setActiveTab] = useState<'home' | 'shop'>('home');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'default' | 'price-low' | 'price-high' | 'rating'>('default');
 
-  // New routing states
+  // Routing states
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [productsLoaded, setProductsLoaded] = useState(false);
   const [buyNowItem, setBuyNowItem] = useState<CartItem | null>(null);
@@ -91,14 +97,34 @@ function MainApp() {
     productsRef.current = products;
   }, [products]);
 
-  // Category slider ref (for desktop arrow buttons)
+  // Category slider (scroll + progress bar)
   const categoryScrollRef = useRef<HTMLDivElement>(null);
-  const scrollCategories = (dir: 'left' | 'right') => {
+  const [catProgress, setCatProgress] = useState({ width: 100, left: 0 });
+
+  const updateCatProgress = () => {
+    const el = categoryScrollRef.current;
+    if (!el || el.scrollWidth <= 0) return;
+    const width = Math.min(100, (el.clientWidth / el.scrollWidth) * 100);
+    const left = (el.scrollLeft / el.scrollWidth) * 100;
+    setCatProgress({ width, left });
+  };
+
+  const scrollCategories = () => {
     const el = categoryScrollRef.current;
     if (!el) return;
-    const amount = el.clientWidth * 0.8;
-    el.scrollBy({ left: dir === 'left' ? -amount : amount, behavior: 'smooth' });
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+    if (atEnd) {
+      el.scrollTo({ left: 0, behavior: 'smooth' });
+    } else {
+      el.scrollBy({ left: el.clientWidth * 0.8, behavior: 'smooth' });
+    }
   };
+
+  useEffect(() => {
+    updateCatProgress();
+    window.addEventListener('resize', updateCatProgress);
+    return () => window.removeEventListener('resize', updateCatProgress);
+  }, [categories, view, activeTab, selectedCategory, isInitialLoading]);
 
   // Sync route on mount and browser back/forward buttons
   useEffect(() => {
@@ -187,15 +213,14 @@ function MainApp() {
     window.history.pushState({ view: 'admin', tab: savedTab }, '', `/admin?tab=${savedTab}`);
   };
 
-  // Modals state (Keep for Cart/Auth/Tracking)
+  // Modals state
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isWishlistOpen, setIsWishlistOpen] = useState(false); // Maybe keep this for drawer? Prompt says wishlist page.
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isTrackingOpen, setIsTrackingOpen] = useState(false);
   const [isAiAdvisorOpen, setIsAiAdvisorOpen] = useState(false);
   const [isSqlModalOpen, setIsSqlModalOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  
+
   const [checkoutDiscount, setCheckoutDiscount] = useState(0);
   const [checkoutCouponCode, setCheckoutCouponCode] = useState('');
 
@@ -308,13 +333,13 @@ function MainApp() {
   if (view === 'admin') {
     return (
       <ErrorBoundary>
-        <AdminDashboard 
-          onClose={navigateToStore} 
-          products={products} 
-          categories={categories} 
+        <AdminDashboard
+          onClose={navigateToStore}
+          products={products}
+          categories={categories}
           banners={banners}
           deliveryZones={deliveryZones}
-          onRefreshProducts={fetchSupabaseData} 
+          onRefreshProducts={fetchSupabaseData}
           onRefreshCategories={fetchSupabaseData}
           onRefreshBanners={fetchSupabaseData}
           onRefreshDeliveryZones={fetchSupabaseData}
@@ -330,7 +355,7 @@ function MainApp() {
         .select('role')
         .eq('id', userId)
         .single();
-      
+
       if (data && data.role === 'admin') {
         setIsAdmin(true);
       }
@@ -349,9 +374,9 @@ function MainApp() {
 
   // Cart Handlers
   const handleAddToCart = (product: Product, quantity = 1, variant?: string) => {
-    setCart(prev => {
+    setCart((prev) => {
       const existingIndex = prev.findIndex(
-        item => item.product.id === product.id && item.selectedVariant === variant
+        (item) => item.product.id === product.id && item.selectedVariant === variant
       );
       if (existingIndex > -1) {
         const updated = [...prev];
@@ -364,31 +389,33 @@ function MainApp() {
   };
 
   const handleUpdateQuantity = (productId: string, delta: number, variant?: string) => {
-    setCart(prev => {
-      return prev.map(item => {
-        if (item.product.id === productId && item.selectedVariant === variant) {
-          const newQty = item.quantity + delta;
-          return newQty > 0 ? { ...item, quantity: newQty } : null;
-        }
-        return item;
-      }).filter(Boolean) as CartItem[];
+    setCart((prev) => {
+      return prev
+        .map((item) => {
+          if (item.product.id === productId && item.selectedVariant === variant) {
+            const newQty = item.quantity + delta;
+            return newQty > 0 ? { ...item, quantity: newQty } : null;
+          }
+          return item;
+        })
+        .filter(Boolean) as CartItem[];
     });
   };
 
   const handleRemoveItem = (productId: string, variant?: string) => {
-    setCart(prev => prev.filter(item => !(item.product.id === productId && item.selectedVariant === variant)));
+    setCart((prev) => prev.filter((item) => !(item.product.id === productId && item.selectedVariant === variant)));
   };
 
   const handleToggleWishlist = (productId: string) => {
-    setWishlist(prev => 
-      prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]
+    setWishlist((prev) =>
+      prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
     );
   };
 
   // Filter & Sort Products
-  const filteredProducts = products.filter(p => {
+  const filteredProducts = products.filter((p) => {
     if (selectedCategory !== 'all') {
-      const cat = categories.find(c => c.slug === selectedCategory);
+      const cat = categories.find((c) => c.slug === selectedCategory);
       if (cat && p.category_id !== cat.id) return false;
       if (!cat && selectedCategory !== p.category_id) return false;
     }
@@ -402,13 +429,16 @@ function MainApp() {
     return 0;
   });
 
-  const flashSaleProducts = products.filter(p => p.is_flash_sale);
+  const flashSaleProducts = products.filter((p) => p.is_flash_sale);
 
   // Loading/Not Found States
   if (isInitialLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div
+          className="animate-spin rounded-full h-12 w-12 border-b-2"
+          style={{ borderColor: MAROON }}
+        ></div>
       </div>
     );
   }
@@ -417,14 +447,24 @@ function MainApp() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <h1 className="text-4xl font-black text-gray-900 mb-4">404 - Page Not Found</h1>
-        <button onClick={navigateToStore} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold">Go Home</button>
+        <button
+          onClick={navigateToStore}
+          className="text-white px-6 py-2 rounded-xl font-bold"
+          style={{ background: MAROON }}
+        >
+          Go Home
+        </button>
       </div>
     );
   }
 
+  const sortedCategories = categories
+    .filter((cat) => cat.is_active !== false)
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+
   // Main Content Area
   return (
-    <div className="min-h-screen flex flex-col bg-[#F4F7FC] text-[#0F172A]">
+    <div className="min-h-screen flex flex-col bg-white text-[#1A1A1A] overflow-x-hidden">
       <Navbar
         categories={categories}
         cart={cart}
@@ -454,219 +494,215 @@ function MainApp() {
 
       <main className="flex-1">
         {view === 'product' && selectedProduct ? (
-          <ProductPage 
-            product={selectedProduct} 
-            categoryName={categories.find(c => c.id === selectedProduct.category_id || c.slug === selectedProduct.category_id)?.name}
+          <ProductPage
+            product={selectedProduct}
+            categoryName={categories.find((c) => c.id === selectedProduct.category_id || c.slug === selectedProduct.category_id)?.name}
             onClose={navigateToStore}
             onAddToCart={(p, q, v) => handleAddToCart(p, q, v)}
             onOrderNow={(p, q, v) => handleOrderNow(p, q, v)}
             onToggleWishlist={handleToggleWishlist}
             isWishlisted={wishlist.includes(selectedProduct.id)}
-            relatedProducts={products.filter(p => p.category_id === selectedProduct.category_id && p.id !== selectedProduct.id).slice(0, 4)}
+            relatedProducts={products.filter((p) => p.category_id === selectedProduct.category_id && p.id !== selectedProduct.id).slice(0, 4)}
             onSelectProduct={navigateToProduct}
           />
         ) : view === 'wishlist' ? (
-          <WishlistPage 
-            onClose={navigateToStore} 
-            products={products} 
+          <WishlistPage
+            onClose={navigateToStore}
+            products={products}
             wishlistIds={wishlist}
             onToggleWishlist={handleToggleWishlist}
             onAddToCart={handleAddToCart}
             onSelectProduct={navigateToProduct}
           />
         ) : activeTab === 'home' && selectedCategory === 'all' ? (
-          <div className="space-y-12 pb-16">
-            
-            {/* Full-width Live Auto-scroll Hero Banner Slider */}
+          <div className="space-y-10 pb-16 sm:space-y-14">
+
+            {/* Hero Banner */}
             <HeroSlider banners={banners} onNavigate={handleBannerNavigate} />
 
-            {/* Category Slider Section */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex items-end justify-between gap-3 mb-4 sm:mb-6">
-                <div className="min-w-0">
-                  <h2 className="text-lg sm:text-2xl font-black text-gray-900 leading-tight">জনপ্রিয় ক্যাটাগরি</h2>
-                  <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5">আপনার পছন্দের গ্যাজেট ক্যাটাগরি সিলেক্ট করুন</p>
-                </div>
-
-                {/* Desktop arrows */}
-                <div className="hidden sm:flex items-center gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => scrollCategories('left')}
-                    aria-label="আগের ক্যাটাগরি"
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:border-[#0052FF] hover:bg-[#0052FF] hover:text-white cursor-pointer"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => scrollCategories('right')}
-                    aria-label="পরের ক্যাটাগরি"
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:border-[#0052FF] hover:bg-[#0052FF] hover:text-white cursor-pointer"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
+            {/* Shop By Category */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between gap-3 mb-5">
+                <h2 className="text-[22px] sm:text-3xl font-bold tracking-tight text-[#1A1A1A]">
+                  Shop By Category
+                </h2>
+                <button
+                  type="button"
+                  onClick={scrollCategories}
+                  className="flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-wider transition hover:opacity-80"
+                  style={{ background: PINK_SOFT, color: MAROON }}
+                >
+                  <ArrowRight className="h-3.5 w-3.5" />
+                  Slide
+                </button>
               </div>
 
-              {/* Slider track: swipe on mobile, arrows on desktop */}
               <div
                 ref={categoryScrollRef}
+                onScroll={updateCatProgress}
                 className="
-                  -mx-4 flex gap-3 overflow-x-auto px-4 pb-3 pt-1 snap-x snap-mandatory scroll-smooth
+                  -mx-4 flex gap-4 overflow-x-auto px-4 pb-2 pt-1 snap-x snap-mandatory scroll-smooth
                   [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
-                  sm:mx-0 sm:gap-4 sm:px-1
+                  sm:mx-0 sm:gap-8 sm:px-1
                 "
               >
-                {categories
-                  .filter((cat) => cat.is_active !== false)
-                  .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-                  .map((cat) => {
-                    const IconComp = getCategoryIconComponent(cat.icon);
-                    return (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => { setActiveTab('shop'); setSelectedCategory(cat.slug); }}
-                        className="group flex w-[104px] shrink-0 snap-start flex-col items-center rounded-2xl border border-gray-100 bg-white p-3 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-[#0052FF] hover:shadow-lg cursor-pointer sm:w-[132px] sm:p-4 lg:w-[150px]"
-                      >
-                        <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-blue-100/70 bg-gradient-to-br from-blue-50 to-indigo-50 text-[#0052FF] shadow-inner transition duration-300 group-hover:scale-110 sm:h-16 sm:w-16">
-                          {cat.image_url ? (
-                            <img
-                              src={cat.image_url}
-                              alt={cat.name}
-                              loading="lazy"
-                              className="h-full w-full object-cover"
-                              onError={(e) => {
-                                (e.currentTarget as HTMLImageElement).style.display = 'none';
-                              }}
-                            />
-                          ) : (
-                            <IconComp className="h-7 w-7 text-[#0052FF] sm:h-8 sm:w-8" />
-                          )}
-                        </div>
-                        <div className="mt-2.5 w-full min-w-0">
-                          <h4 className="truncate text-xs font-bold text-gray-900 transition group-hover:text-[#0052FF] sm:text-sm">
-                            {cat.name_bn || cat.name}
-                          </h4>
-                          <p className="mt-0.5 truncate text-[10px] text-gray-400 sm:text-[11px]">{cat.name}</p>
-                          {cat.sub_label && (
-                            <span className="mt-1.5 inline-block max-w-full truncate rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-semibold text-[#0052FF] sm:text-[10px]">
-                              {cat.sub_label}
-                            </span>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
+                {sortedCategories.map((cat) => {
+                  const IconComp = getCategoryIconComponent(cat.icon);
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => { setActiveTab('shop'); setSelectedCategory(cat.slug); }}
+                      className="group flex w-[92px] shrink-0 snap-start flex-col items-center text-center cursor-pointer sm:w-[130px]"
+                    >
+                      <div className="flex h-[84px] w-[84px] items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-white p-2.5 transition duration-300 group-hover:border-[#7A1F3D] group-hover:bg-[#E3EAFB] sm:h-[120px] sm:w-[120px] sm:p-4">
+                        {cat.image_url ? (
+                          <img
+                            src={cat.image_url}
+                            alt={cat.name}
+                            loading="lazy"
+                            className="h-full w-full object-contain"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <IconComp className="h-9 w-9 text-gray-700 sm:h-12 sm:w-12" />
+                        )}
+                      </div>
+                      <h4 className="mt-3 w-full text-[11px] font-extrabold uppercase leading-tight tracking-wide text-[#1A1A1A] sm:text-sm">
+                        {cat.name}
+                      </h4>
+                    </button>
+                  );
+                })}
               </div>
-            </div>
 
-            {/* Flash Sale Section */}
-            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-              <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#0B1B4D] via-[#14287A] to-[#0A1236] shadow-xl ring-1 ring-white/10">
-                {/* Decorative glow */}
-                <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-rose-500/20 blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-cyan-400/10 blur-3xl" />
-
-                {/* Header */}
-                <div className="relative px-4 pt-4 pb-3 sm:px-8 sm:pt-7 sm:pb-5">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    {/* Title */}
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 shadow-lg shadow-rose-900/40">
-                        <Flame className="h-5 w-5 sm:h-6 sm:w-6 text-white animate-pulse" />
-                      </div>
-                      <div className="min-w-0">
-                        <h2 className="text-base sm:text-2xl font-black leading-tight tracking-tight text-white">
-                          ফ্ল্যাশ সেল <span className="text-[#00E5FF]">(Flash Sale)</span>
-                        </h2>
-                        <p className="mt-0.5 text-[11px] sm:text-xs leading-snug text-blue-200/90">
-                          সীমিত সময়ের জন্য অবিশ্বাস্য ছাড়ে প্রিমিয়াম গ্যাজেট
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Countdown */}
-                    <div className="flex items-center justify-between sm:justify-end gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-sm">
-                      <span className="text-[11px] sm:text-xs font-bold text-[#00E5FF] whitespace-nowrap">সময় বাকি</span>
-                      <div className="flex items-center gap-1.5">
-                        {[
-                          { v: '১২', l: 'ঘণ্টা' },
-                          { v: '৪৫', l: 'মিনিট' },
-                          { v: '৩০', l: 'সেকেন্ড' },
-                        ].map((t, i) => (
-                          <React.Fragment key={t.l}>
-                            <div className="flex min-w-[42px] flex-col items-center rounded-lg bg-gradient-to-b from-rose-500 to-rose-700 px-2 py-1 shadow-md">
-                              <span className="text-sm sm:text-base font-black leading-none text-white">{t.v}</span>
-                              <span className="mt-0.5 text-[8px] sm:text-[9px] font-semibold leading-none text-rose-100">{t.l}</span>
-                            </div>
-                            {i < 2 && <span className="text-sm font-black text-white/70">:</span>}
-                          </React.Fragment>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Products: mobile = horizontal swipe, sm+ = grid */}
-                <div className="relative pb-4 sm:px-8 sm:pb-8">
-                  <div
-                    className="
-                      flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scroll-smooth
-                      [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
-                      sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 sm:snap-none
-                      md:grid-cols-4 lg:gap-5 xl:grid-cols-5
-                    "
-                  >
-                    {flashSaleProducts.map((product) => (
-                      <div
-                        key={product.id}
-                        className="w-[calc(50%-6px)] min-w-[calc(50%-6px)] shrink-0 snap-start sm:w-auto sm:min-w-0 sm:shrink"
-                      >
-                        <ProductCard
-                          product={product}
-                          onAddToCart={(p) => handleAddToCart(p)}
-                          onOrderNow={(p) => navigateToProduct(p)}
-                          onSelectProduct={navigateToProduct}
-                          onToggleWishlist={handleToggleWishlist}
-                          isWishlisted={wishlist.includes(product.id)}
-                        />
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Mobile swipe hint */}
-                  {flashSaleProducts.length > 2 && (
-                    <p className="mt-2 text-center text-[10px] font-medium text-blue-200/70 sm:hidden">
-                      ← আরও দেখতে স্লাইড করুন →
-                    </p>
-                  )}
-                </div>
+              {/* Scroll progress bar */}
+              <div className="mx-auto mt-4 h-[3px] w-24 overflow-hidden rounded-full bg-gray-200">
+                <div
+                  className="relative h-full rounded-full transition-[margin,width] duration-150"
+                  style={{
+                    width: `${catProgress.width}%`,
+                    marginLeft: `${catProgress.left}%`,
+                    background: MAROON,
+                  }}
+                />
               </div>
-            </div>
 
-            {/* All Featured Products */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
-                <div>
-                  <span className="text-[11px] font-bold tracking-widest text-[#B84040] uppercase block mb-1">
-                    MOST COVETED
-                  </span>
-                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-gray-900 tracking-tight">
-                    Featured Products
-                  </h2>
-                </div>
+              <div className="mt-6 flex justify-center">
                 <button
-                  onClick={() => setActiveTab('shop')}
-                  className="text-xs font-bold text-[#B84040] hover:text-[#9e2a2a] hover:underline flex items-center gap-1 uppercase tracking-wider self-start sm:self-auto"
+                  type="button"
+                  onClick={() => { setActiveTab('shop'); setSelectedCategory('all'); }}
+                  className="flex w-full max-w-sm items-center justify-center gap-2 rounded-sm border bg-white px-6 py-3.5 text-xs font-bold uppercase tracking-[0.15em] transition hover:text-white sm:text-sm"
+                  style={{ borderColor: MAROON, color: MAROON }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = MAROON; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; }}
                 >
-                  VIEW ALL PRODUCTS <ChevronRight className="w-3.5 h-3.5" />
+                  View All Categories <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            </section>
+
+            {/* Flash Sale (only when products exist) */}
+            {flashSaleProducts.length > 0 && (
+              <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+                <div
+                  className="relative overflow-hidden rounded-2xl shadow-xl sm:rounded-3xl"
+                  style={{ background: `linear-gradient(135deg, ${MAROON_DARK}, ${MAROON} 55%, #3D0B20)` }}
+                >
+                  <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-rose-300/20 blur-3xl" />
+
+                  <div className="relative px-4 pt-4 pb-3 sm:px-8 sm:pt-7 sm:pb-5">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-white/15">
+                          <Flame className="h-5 w-5 sm:h-6 sm:w-6 text-white animate-pulse" />
+                        </div>
+                        <div className="min-w-0">
+                          <h2 className="text-base sm:text-2xl font-black leading-tight tracking-tight text-white">
+                            ফ্ল্যাশ সেল <span className="text-rose-200">(Flash Sale)</span>
+                          </h2>
+                          <p className="mt-0.5 text-[11px] sm:text-xs leading-snug text-rose-100/90">
+                            সীমিত সময়ের জন্য অবিশ্বাস্য ছাড়ে প্রিমিয়াম গ্যাজেট
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between sm:justify-end gap-3 rounded-xl border border-white/15 bg-white/10 px-3 py-2">
+                        <span className="text-[11px] sm:text-xs font-bold text-rose-100 whitespace-nowrap">সময় বাকি</span>
+                        <div className="flex items-center gap-1.5">
+                          {[
+                            { v: '১২', l: 'ঘণ্টা' },
+                            { v: '৪৫', l: 'মিনিট' },
+                            { v: '৩০', l: 'সেকেন্ড' },
+                          ].map((t, i) => (
+                            <React.Fragment key={t.l}>
+                              <div className="flex min-w-[42px] flex-col items-center rounded-lg bg-white px-2 py-1 shadow-md">
+                                <span className="text-sm sm:text-base font-black leading-none" style={{ color: MAROON }}>{t.v}</span>
+                                <span className="mt-0.5 text-[8px] sm:text-[9px] font-semibold leading-none text-gray-500">{t.l}</span>
+                              </div>
+                              {i < 2 && <span className="text-sm font-black text-white/70">:</span>}
+                            </React.Fragment>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="relative pb-4 sm:px-8 sm:pb-8">
+                    <div
+                      className="
+                        flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scroll-smooth
+                        [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
+                        sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 sm:snap-none
+                        md:grid-cols-4 lg:gap-5 xl:grid-cols-5
+                      "
+                    >
+                      {flashSaleProducts.map((product) => (
+                        <div
+                          key={product.id}
+                          className="w-[calc(50%-6px)] min-w-[calc(50%-6px)] shrink-0 snap-start sm:w-auto sm:min-w-0 sm:shrink"
+                        >
+                          <ProductCard
+                            product={product}
+                            onAddToCart={(p) => handleAddToCart(p)}
+                            onOrderNow={(p) => navigateToProduct(p)}
+                            onSelectProduct={navigateToProduct}
+                            onToggleWishlist={handleToggleWishlist}
+                            isWishlisted={wishlist.includes(product.id)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    {flashSaleProducts.length > 2 && (
+                      <p className="mt-2 text-center text-[10px] font-medium text-rose-100/70 sm:hidden">
+                        ← আরও দেখতে স্লাইড করুন →
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Featured Products */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between gap-3 mb-5">
+                <h2 className="text-[22px] sm:text-3xl font-bold tracking-tight text-[#1A1A1A]">
+                  Featured Products
+                </h2>
+                <button
+                  onClick={() => { setActiveTab('shop'); setSelectedCategory('all'); }}
+                  className="flex shrink-0 items-center gap-1 text-[11px] sm:text-xs font-bold uppercase tracking-wider hover:underline"
+                  style={{ color: MAROON }}
+                >
+                  View All Products <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
-                {products.slice(0, 10).map(product => (
+                {products.slice(0, 10).map((product) => (
                   <ProductCard
                     key={product.id}
                     product={product}
@@ -678,17 +714,19 @@ function MainApp() {
                   />
                 ))}
               </div>
-            </div>
+            </section>
 
           </div>
         ) : (
           /* Shop / Catalog Tab */
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-            
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 pb-5">
               <div>
-                <h1 className="text-xl sm:text-2xl font-black text-gray-900">
-                  {selectedCategory === 'all' ? 'সকল প্রোডাক্ট' : categories.find(c => c.slug === selectedCategory)?.name_bn || 'প্রোডাক্ট কালেকশন'}
+                <h1 className="text-[22px] sm:text-3xl font-bold tracking-tight text-[#1A1A1A]">
+                  {selectedCategory === 'all'
+                    ? 'সকল প্রোডাক্ট'
+                    : categories.find((c) => c.slug === selectedCategory)?.name_bn || 'প্রোডাক্ট কালেকশন'}
                 </h1>
                 <p className="text-xs text-gray-500 mt-1">সর্বমোট {sortedProducts.length}টি গ্যাজেট উপলব্ধ রয়েছে</p>
               </div>
@@ -698,7 +736,7 @@ function MainApp() {
                 <select
                   value={sortBy}
                   onChange={(e: any) => setSortBy(e.target.value)}
-                  className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#0052FF]"
+                  className="bg-white border border-gray-200 rounded-sm px-4 py-2 text-xs font-bold text-gray-800 focus:outline-none focus:border-[#7A1F3D]"
                 >
                   <option value="default">ডিফল্ট</option>
                   <option value="price-low">মূল্য: কম থেকে বেশি</option>
@@ -709,8 +747,11 @@ function MainApp() {
             </div>
 
             {sortedProducts.length === 0 ? (
-              <div className="bg-white rounded-3xl p-12 text-center border border-gray-100 shadow-sm space-y-4">
-                <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 mx-auto flex items-center justify-center">
+              <div className="rounded-2xl p-12 text-center border border-gray-100 space-y-4">
+                <div
+                  className="w-16 h-16 rounded-full mx-auto flex items-center justify-center"
+                  style={{ background: PINK_SOFT, color: MAROON }}
+                >
                   <Package className="w-8 h-8" />
                 </div>
                 <div>
@@ -719,14 +760,15 @@ function MainApp() {
                 </div>
                 <button
                   onClick={() => setSelectedCategory('all')}
-                  className="px-5 py-2.5 rounded-xl bg-[#0052FF] text-white text-xs font-bold shadow-md hover:bg-blue-700 transition cursor-pointer"
+                  className="px-6 py-2.5 rounded-sm text-white text-xs font-bold uppercase tracking-wider transition hover:opacity-90 cursor-pointer"
+                  style={{ background: MAROON }}
                 >
                   সব প্রোডাক্ট দেখুন
                 </button>
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
-                {sortedProducts.map(product => (
+                {sortedProducts.map((product) => (
                   <ProductCard
                     key={product.id}
                     product={product}
@@ -745,11 +787,9 @@ function MainApp() {
 
       </main>
 
-      {/* Footer */}
       <Footer />
-      
-      {/* Modals */}
 
+      {/* Modals */}
       <CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}

@@ -22,6 +22,39 @@ const MAROON = '#7A1F3D';
 const MAROON_DARK = '#5E1630';
 const PINK_SOFT = '#FCE8EC';
 
+const TimerDisplay = () => {
+  const [timeLeft, setTimeLeft] = useState(12 * 3600 + 45 * 60 + 30);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 12 * 3600 + 45 * 60 + 30));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const hours = Math.floor(timeLeft / 3600);
+  const minutes = Math.floor((timeLeft % 3600) / 60);
+  const seconds = timeLeft % 60;
+
+  return (
+    <div className="flex items-center gap-1.5">
+      {[
+        { v: hours.toString().padStart(2, '0'), l: 'ঘণ্টা' },
+        { v: minutes.toString().padStart(2, '0'), l: 'মিনিট' },
+        { v: seconds.toString().padStart(2, '0'), l: 'সেকেন্ড' },
+      ].map((t, i) => (
+        <React.Fragment key={t.l}>
+          <div className="flex min-w-[42px] flex-col items-center rounded-lg bg-white px-2 py-1 shadow-md">
+            <span className="text-sm sm:text-base font-black leading-none" style={{ color: MAROON }}>{t.v}</span>
+            <span className="mt-0.5 text-[8px] sm:text-[9px] font-semibold leading-none text-gray-500">{t.l}</span>
+          </div>
+          {i < 2 && <span className="text-sm font-black text-white/70">:</span>}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+};
+
 // Error Boundary to prevent white screen crashes
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
   state: { hasError: boolean; error: Error | null } = { hasError: false, error: null };
@@ -490,6 +523,12 @@ function MainApp() {
         }}
         user={user}
         isAdmin={isAdmin}
+        onLogout={() => {
+          supabase.auth.signOut();
+          setUser(null);
+          setIsAdmin(false);
+          navigateToStore();
+        }}
       />
 
       <main className="flex-1">
@@ -631,21 +670,7 @@ function MainApp() {
 
                       <div className="flex items-center justify-between sm:justify-end gap-3 rounded-xl border border-white/15 bg-white/10 px-3 py-2">
                         <span className="text-[11px] sm:text-xs font-bold text-rose-100 whitespace-nowrap">সময় বাকি</span>
-                        <div className="flex items-center gap-1.5">
-                          {[
-                            { v: '১২', l: 'ঘণ্টা' },
-                            { v: '৪৫', l: 'মিনিট' },
-                            { v: '৩০', l: 'সেকেন্ড' },
-                          ].map((t, i) => (
-                            <React.Fragment key={t.l}>
-                              <div className="flex min-w-[42px] flex-col items-center rounded-lg bg-white px-2 py-1 shadow-md">
-                                <span className="text-sm sm:text-base font-black leading-none" style={{ color: MAROON }}>{t.v}</span>
-                                <span className="mt-0.5 text-[8px] sm:text-[9px] font-semibold leading-none text-gray-500">{t.l}</span>
-                              </div>
-                              {i < 2 && <span className="text-sm font-black text-white/70">:</span>}
-                            </React.Fragment>
-                          ))}
-                        </div>
+                        <TimerDisplay />
                       </div>
                     </div>
                   </div>

@@ -24,6 +24,7 @@ interface NavbarProps {
   setSelectedCategory: (cat: string) => void;
   user: any;
   isAdmin: boolean;
+  onLogout?: () => void;
 }
 
 const HOTLINE = '01887816106';
@@ -156,7 +157,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   setActiveTab,
   selectedCategory,
   setSelectedCategory,
-  isAdmin
+  user,
+  isAdmin,
+  onLogout
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -221,21 +224,8 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* ============================ Sticky header ============================ */}
       <header className="sticky top-0 z-40 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center h-14 sm:h-16 gap-2">
-
-            {/* Left: hamburger */}
-            <div className="flex items-center justify-start">
-              <button
-                type="button"
-                onClick={() => setMenuOpen(true)}
-                aria-label="Open menu"
-                className={`${iconBtn} -ml-1.5`}
-              >
-                <Menu className="w-6 h-6" strokeWidth={1.6} />
-              </button>
-            </div>
-
-            {/* Center: brand logo */}
+          <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
+            {/* Left: brand logo */}
             <button
               type="button"
               onClick={goHome}
@@ -245,8 +235,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               <Logo />
             </button>
 
-            {/* Right: search / heart / cart (/ account on desktop) */}
-            <div className="flex items-center justify-end">
+            {/* Right: search / heart / cart / menu */}
+            <div className="flex items-center justify-end gap-1">
               <button
                 type="button"
                 onClick={() => setSearchOpen((s) => !s)}
@@ -265,7 +255,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
               </button>
 
-              <button type="button" onClick={onOpenCart} aria-label="Cart" className={`${iconBtn} -mr-1.5 sm:mr-0`}>
+              <button type="button" onClick={onOpenCart} aria-label="Cart" className={iconBtn}>
                 <ShoppingCart className="w-[22px] h-[22px]" strokeWidth={1.6} />
                 {totalCartItems > 0 && (
                   <span className={badge} style={{ background: MAROON }}>
@@ -274,16 +264,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
               </button>
 
-              {/* Account: শুধু desktop এ (মোবাইলে মেনুর ভেতরে আছে) */}
+              {/* Hamburger */}
               <button
                 type="button"
-                onClick={isAdmin ? onOpenAdmin : onOpenAuth}
-                aria-label={isAdmin ? 'Admin panel' : 'Account'}
-                title={isAdmin ? 'অ্যাডমিন প্যানেল' : 'লগইন / একাউন্ট'}
-                className={`${iconBtn} hidden md:inline-flex`}
-                style={isAdmin ? { color: MAROON } : undefined}
+                onClick={() => setMenuOpen(true)}
+                aria-label="Open menu"
+                className={iconBtn}
               >
-                <User className="w-[22px] h-[22px]" strokeWidth={1.6} />
+                <Menu className="w-6 h-6" strokeWidth={1.6} />
               </button>
             </div>
           </div>
@@ -411,21 +399,39 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
               )}
             </button>
-            {isAdmin ? (
+            <div className="h-px bg-gray-100 my-3" />
+            
+            {user ? (
+              <button
+                type="button"
+                onClick={() => { onLogout?.(); closeMenu(); }}
+                className="w-full flex items-center gap-3 py-3 px-3 rounded-xl text-sm font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100"
+              >
+                <User className="w-5 h-5" /> লগ আউট
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => { onOpenAuth(); closeMenu(); }}
+                className="w-full flex items-center gap-4 py-4 px-4 rounded-2xl text-sm font-semibold bg-[#F5EBEB] border border-[#EAD5D5] hover:bg-[#EEDDDC] transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-rose-200">
+                  <User className="w-5 h-5 text-rose-800" />
+                </div>
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-bold text-gray-900">My Account</span>
+                  <span className="text-xs text-rose-900 font-semibold underline">Login / Sign Up</span>
+                </div>
+              </button>
+            )}
+
+            {isAdmin && (
               <button
                 type="button"
                 onClick={() => { onOpenAdmin(); closeMenu(); }}
                 className="w-full flex items-center gap-3 py-3 px-3 rounded-xl text-sm font-semibold bg-purple-50 text-purple-700"
               >
                 <User className="w-5 h-5" /> অ্যাডমিন প্যানেল
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => { onOpenAuth(); closeMenu(); }}
-                className="w-full flex items-center gap-3 py-3 px-3 rounded-xl text-sm font-semibold text-gray-800 hover:bg-gray-50"
-              >
-                <User className="w-5 h-5 text-gray-500" /> লগইন / একাউন্ট
               </button>
             )}
           </div>

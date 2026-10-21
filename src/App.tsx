@@ -79,19 +79,12 @@ function MainApp() {
   const [sortBy, setSortBy] = useState<'default' | 'price-low' | 'price-high' | 'rating'>('default');
 
   // New routing states
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [productsLoaded, setProductsLoaded] = useState(false);
+  const [buyNowItem, setBuyNowItem] = useState<CartItem | null>(null);
+  const [checkoutSession, setCheckoutSession] = useState(0);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [view, setView] = useState<'store' | 'admin' | 'product' | 'wishlist'>(() => {
-    try {
-      const path = window.location.pathname;
-      const search = window.location.search;
-      if (path.startsWith('/admin') || search.includes('tab=') || localStorage.getItem('muba_admin_active') === 'true') {
-        return 'admin';
-      }
-      if (path === '/wishlist') return 'wishlist';
-      if (path.startsWith('/product/')) return 'product';
-    } catch { /* ignore */ }
-    return 'store';
-  });
+  const [view, setView] = useState<'store' | 'admin' | 'product' | 'wishlist' | 'not-found'>('store');
 
   const productsRef = useRef(products);
   useEffect(() => {
@@ -107,46 +100,34 @@ function MainApp() {
     el.scrollBy({ left: dir === 'left' ? -amount : amount, behavior: 'smooth' });
   };
 
-  // Sync route on mount and browser back/forward buttons (decoupled from products updates to prevent accidental route resets)
+  // Sync route on mount and browser back/forward buttons
   useEffect(() => {
-    const syncRouteFromUrl = () => {
+    const syncRouteFromUrl = async () => {
+      setIsInitialLoading(true);
       const path = window.location.pathname;
       const search = window.location.search;
 
       if (path.startsWith('/product/')) {
         const idOrSlug = decodeURIComponent(path.replace('/product/', '').replace(/\/$/, ''));
-        const list = productsRef.current.length > 0 ? productsRef.current : MOCK_PRODUCTS;
-        const found = list.find((p) => p.slug === idOrSlug || p.id === idOrSlug);
-        if (found) {
-          setSelectedProduct(found);
-          setView('product');
-          return;
-        }
+        const found = productsRef.current.find((p) => p.slug === idOrSlug || p.id === idOrSlug);
+        setSelectedProduct(found || null);
+        setView('product');
+        return;
       } else if (path === '/wishlist') {
         setView('wishlist');
         setSelectedProduct(null);
-        return;
+        document.title = 'Wishlist';
       } else if (path.startsWith('/admin') || search.includes('tab=')) {
         setView('admin');
         setSelectedProduct(null);
+        document.title = 'Admin Panel';
         try { localStorage.setItem('muba_admin_active', 'true'); } catch { /* ignore */ }
-        return;
+      } else {
+        setView('store');
+        setSelectedProduct(null);
+        document.title = 'Muba Store';
       }
-
-      // Check if admin is currently active in session
-      try {
-        if (localStorage.getItem('muba_admin_active') === 'true' && path === '/') {
-          const state = window.history.state;
-          if (state?.view !== 'store') {
-            setView('admin');
-            setSelectedProduct(null);
-            return;
-          }
-        }
-      } catch { /* ignore */ }
-
-      setView('store');
-      setSelectedProduct(null);
+      setIsInitialLoading(false);
     };
 
     syncRouteFromUrl();
@@ -154,12 +135,25 @@ function MainApp() {
     return () => window.removeEventListener('popstate', syncRouteFromUrl);
   }, []);
 
+  useEffect(() => {
+    if (view !== 'product') return;
+    const path = window.location.pathname;
+    if (!path.startsWith('/product/')) return;
+    const slug = decodeURIComponent(path.replace('/product/', '').replace(/\/$/, ''));
+    const found = products.find((p) => p.slug === slug || p.id === slug);
+    if (found) {
+      if (selectedProduct?.id !== found.id) setSelectedProduct(found);
+      document.title = found.name;
+    }
+  }, [products, productsLoaded, view]);
+
   const navigateToProduct = (product: Product) => {
     const slug = product.slug || product.id;
     setSelectedProduct(product);
     setView('product');
+    document.title = `${product.name}`;
     window.history.pushState({ view: 'product', id: product.id, slug }, '', `/product/${slug}`);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const navigateToWishlist = () => {
@@ -251,6 +245,9 @@ function MainApp() {
       }
     } catch (err) {
       console.log('Using local mock data fallback:', err);
+    } finally {
+      setProductsLoaded(true);
+      setIsInitialLoading(false);
     }
   };
 
@@ -342,6 +339,14 @@ function MainApp() {
     }
   };
 
+  const handleOrderNow = (p: Product, q = 1, v?: string) => {
+    setBuyNowItem({ product: p, quantity: q, selectedVariant: v });
+    setCheckoutDiscount(0);
+    setCheckoutCouponCode('');
+    setCheckoutSession((s) => s + 1);
+    setIsCheckoutOpen(true);
+  };
+
   // Cart Handlers
   const handleAddToCart = (product: Product, quantity = 1, variant?: string) => {
     setCart(prev => {
@@ -399,10 +404,27 @@ function MainApp() {
 
   const flashSaleProducts = products.filter(p => p.is_flash_sale);
 
+  // Loading/Not Found States
+  if (isInitialLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (view === 'not-found') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+        <h1 className="text-4xl font-black text-gray-900 mb-4">404 - Page Not Found</h1>
+        <button onClick={navigateToStore} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold">Go Home</button>
+      </div>
+    );
+  }
+
+  // Main Content Area
   return (
     <div className="min-h-screen flex flex-col bg-[#F4F7FC] text-[#0F172A]">
-      
-      {/* Navbar */}
       <Navbar
         categories={categories}
         cart={cart}
@@ -430,7 +452,6 @@ function MainApp() {
         isAdmin={isAdmin}
       />
 
-      {/* Main Content Area */}
       <main className="flex-1">
         {view === 'product' && selectedProduct ? (
           <ProductPage 
@@ -438,7 +459,7 @@ function MainApp() {
             categoryName={categories.find(c => c.id === selectedProduct.category_id || c.slug === selectedProduct.category_id)?.name}
             onClose={navigateToStore}
             onAddToCart={(p, q, v) => handleAddToCart(p, q, v)}
-            onOrderNow={(p, q, v) => { handleAddToCart(p, q, v); setIsCheckoutOpen(true); }}
+            onOrderNow={(p, q, v) => handleOrderNow(p, q, v)}
             onToggleWishlist={handleToggleWishlist}
             isWishlisted={wishlist.includes(selectedProduct.id)}
             relatedProducts={products.filter(p => p.category_id === selectedProduct.category_id && p.id !== selectedProduct.id).slice(0, 4)}
@@ -606,10 +627,7 @@ function MainApp() {
                         <ProductCard
                           product={product}
                           onAddToCart={(p) => handleAddToCart(p)}
-                          onOrderNow={(p) => {
-                            handleAddToCart(p, 1);
-                            setIsCheckoutOpen(true);
-                          }}
+                          onOrderNow={(p) => handleOrderNow(p, 1)}
                           onSelectProduct={navigateToProduct}
                           onToggleWishlist={handleToggleWishlist}
                           isWishlisted={wishlist.includes(product.id)}
@@ -653,10 +671,7 @@ function MainApp() {
                     key={product.id}
                     product={product}
                     onAddToCart={(p) => handleAddToCart(p)}
-                    onOrderNow={(p) => {
-                      handleAddToCart(p, 1);
-                      setIsCheckoutOpen(true);
-                    }}
+                    onOrderNow={(p) => handleOrderNow(p, 1)}
                     onSelectProduct={navigateToProduct}
                     onToggleWishlist={handleToggleWishlist}
                     isWishlisted={wishlist.includes(product.id)}
@@ -716,10 +731,7 @@ function MainApp() {
                     key={product.id}
                     product={product}
                     onAddToCart={(p) => handleAddToCart(p)}
-                    onOrderNow={(p) => {
-                      handleAddToCart(p, 1);
-                      setIsCheckoutOpen(true);
-                    }}
+                    onOrderNow={(p) => handleOrderNow(p, 1)}
                     onSelectProduct={navigateToProduct}
                     onToggleWishlist={handleToggleWishlist}
                     isWishlisted={wishlist.includes(product.id)}
@@ -749,26 +761,32 @@ function MainApp() {
         setSelectedZone={setSelectedZone}
         coupons={MOCK_COUPONS}
         onProceedToCheckout={(discount, code) => {
+          setBuyNowItem(null);
+          setCheckoutSession((s) => s + 1);
           setCheckoutDiscount(discount);
           setCheckoutCouponCode(code);
           setIsCheckoutOpen(true);
         }}
       />
 
-      <CheckoutModal
-        isOpen={isCheckoutOpen}
-        onClose={() => {
-          setIsCheckoutOpen(false);
-          setCart([]);
-        }}
-        cart={cart}
-        deliveryZone={selectedZone}
-        deliveryZones={deliveryZones}
-        setSelectedZone={setSelectedZone}
-        discountAmount={checkoutDiscount}
-        couponCode={checkoutCouponCode}
-        onOrderSuccess={() => {}}
-      />
+      {isCheckoutOpen && (
+        <CheckoutModal
+          key={checkoutSession}
+          isOpen={true}
+          onClose={() => {
+            setIsCheckoutOpen(false);
+            if (buyNowItem) setBuyNowItem(null);
+            else setCart([]);
+          }}
+          cart={buyNowItem ? [buyNowItem] : cart}
+          deliveryZone={selectedZone}
+          deliveryZones={deliveryZones}
+          setSelectedZone={setSelectedZone}
+          discountAmount={checkoutDiscount}
+          couponCode={checkoutCouponCode}
+          onOrderSuccess={() => {}}
+        />
+      )}
 
       <OrderTrackingModal
         isOpen={isTrackingOpen}

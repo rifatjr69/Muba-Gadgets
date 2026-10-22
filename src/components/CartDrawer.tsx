@@ -73,15 +73,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           {/* Header */}
           <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50">
             <div className="flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-[#0052FF]" />
+              <ShoppingBag className="w-5 h-5 text-[#7A1F3D]" />
               <h2 className="font-extrabold text-gray-900 text-lg">আপনার শপিং কার্ট</h2>
-              <span className="bg-[#0052FF] text-white text-xs font-bold px-2 py-0.5 rounded-full">
+              <span className="bg-[#7A1F3D] text-white text-xs font-bold px-2 py-0.5 rounded-full">
                 {cart.length}
               </span>
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-200 transition"
+              className="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-200 transition cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -91,16 +91,16 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {cart.length === 0 ? (
               <div className="text-center py-16 space-y-4">
-                <div className="w-20 h-20 bg-blue-50 text-[#0052FF] rounded-full flex items-center justify-center mx-auto text-3xl">
+                <div className="w-20 h-20 bg-rose-50 text-[#7A1F3D] rounded-full flex items-center justify-center mx-auto text-3xl">
                   🛒
                 </div>
-                <h3 className="font-bold text-gray-800 text-base">আপনার কার্টটি খালি আছে</h3>
-                <p className="text-xs text-gray-500 max-w-xs mx-auto">
+                <h3 className="font-bold text-gray-900 text-base">আপনার কার্টটি খালি আছে</h3>
+                <p className="text-xs text-gray-600 max-w-xs mx-auto">
                   আমাদের শপ থেকে আপনার পছন্দের স্মার্টওয়াচ বা ইয়ারবাড কার্টে যোগ করুন।
                 </p>
                 <button
                   onClick={onClose}
-                  className="bg-[#0052FF] text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow hover:bg-blue-700 transition"
+                  className="bg-[#7A1F3D] hover:bg-[#5E1630] text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow transition cursor-pointer"
                 >
                   শপিং করুন
                 </button>
@@ -108,29 +108,29 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             ) : (
               cart.map((item, idx) => (
                 <div key={`${item.product.id}-${item.selectedVariant || idx}`} className="flex gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 relative group">
-                  <img src={item.product.image_url} alt={item.product.name} className="w-20 h-20 object-cover rounded-xl border" />
+                  <img src={item.product.image_url} alt={item.product.name} className="w-20 h-20 object-cover rounded-xl border border-gray-200 bg-white" />
                   
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
                     <div>
                       <h4 className="font-bold text-gray-900 text-xs truncate">{item.product.name}</h4>
                       {item.selectedVariant && (
-                        <p className="text-[11px] text-[#0052FF] font-semibold mt-0.5">ভেরিয়েন্ট: {item.selectedVariant}</p>
+                        <p className="text-[11px] text-[#7A1F3D] font-bold mt-0.5">ভেরিয়েন্ট: {item.selectedVariant}</p>
                       )}
-                      <p className="text-xs font-extrabold text-[#0052FF] mt-1">৳{item.product.price.toLocaleString()}</p>
+                      <p className="text-xs font-black text-[#7A1F3D] mt-1">৳{item.product.price.toLocaleString()}</p>
                     </div>
 
                     <div className="flex items-center justify-between pt-2">
-                      <div className="flex items-center border border-gray-200 rounded-lg bg-white overflow-hidden shadow-sm">
+                      <div className="flex items-center border border-gray-300 rounded-lg bg-white overflow-hidden shadow-xs">
                         <button
                           onClick={() => onUpdateQuantity(item.product.id, -1, item.selectedVariant)}
-                          className="px-2.5 py-1 text-gray-600 hover:bg-gray-100 font-bold text-xs"
+                          className="px-2.5 py-1 text-gray-700 hover:bg-gray-100 font-bold text-xs cursor-pointer"
                         >
                           -
                         </button>
                         <span className="px-3 py-1 font-bold text-xs text-gray-900">{item.quantity}</span>
                         <button
                           onClick={() => onUpdateQuantity(item.product.id, 1, item.selectedVariant)}
-                          className="px-2.5 py-1 text-gray-600 hover:bg-gray-100 font-bold text-xs"
+                          className="px-2.5 py-1 text-gray-700 hover:bg-gray-100 font-bold text-xs cursor-pointer"
                         >
                           +
                         </button>
@@ -138,7 +138,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
                       <button
                         onClick={() => onRemoveItem(item.product.id, item.selectedVariant)}
-                        className="text-gray-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition"
+                        className="text-gray-500 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition cursor-pointer"
                         title="রিমুভ"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -156,8 +156,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               
               {/* Delivery Zone Selector */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
-                  <Truck className="w-3.5 h-3.5 text-[#0052FF]" /> ডেলিভারি এলাকা নির্বাচন করুন:
+                <label className="text-xs font-bold text-gray-800 flex items-center gap-1">
+                  <Truck className="w-3.5 h-3.5 text-[#7A1F3D]" /> ডেলিভারি এলাকা নির্বাচন করুন:
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {deliveryZones && deliveryZones.filter(z => z.is_active !== false).length > 0 ? (
@@ -168,29 +168,29 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                           key={zone.id}
                           type="button"
                           onClick={() => setSelectedZone(zone)}
-                          className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
+                          className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between cursor-pointer ${
                             isSelected 
-                              ? 'border-[#0052FF] bg-blue-50/70 shadow-sm ring-2 ring-[#0052FF]/20' 
+                              ? 'border-[#7A1F3D] bg-rose-50/70 shadow-xs ring-2 ring-[#7A1F3D]/20' 
                               : 'border-gray-200 bg-white hover:bg-gray-50'
                           }`}
                         >
                           <div className="flex items-center justify-between w-full">
-                            <span className={`text-xs font-bold truncate ${isSelected ? 'text-[#0052FF]' : 'text-gray-800'}`}>
+                            <span className={`text-xs font-bold truncate ${isSelected ? 'text-[#7A1F3D]' : 'text-gray-900'}`}>
                               {zone.name_bn}
                             </span>
-                            <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 ${isSelected ? 'border-[#0052FF] bg-[#0052FF]' : 'border-gray-300'}`}>
+                            <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 ${isSelected ? 'border-[#7A1F3D] bg-[#7A1F3D]' : 'border-gray-300'}`}>
                               {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white"></span>}
                             </span>
                           </div>
                           <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-gray-100 text-[11px]">
-                            <span className="text-gray-500">{zone.estimated_days}</span>
-                            <span className="font-extrabold text-[#0052FF]">৳{zone.charge}</span>
+                            <span className="text-gray-600 font-medium">{zone.estimated_days}</span>
+                            <span className="font-black text-[#7A1F3D]">৳{zone.charge}</span>
                           </div>
                         </button>
                       );
                     })
                   ) : (
-                    <div className="col-span-2 p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-xs font-medium">
+                    <div className="col-span-2 p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-xs font-bold">
                       কোনো ডেলিভারি অপশন সক্রিয় নেই।
                     </div>
                   )}
@@ -205,44 +205,44 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     placeholder="কুপন কোড (যেমন: MUBA50)"
                     value={couponCodeInput}
                     onChange={(e) => setCouponCodeInput(e.target.value)}
-                    className="w-full bg-white border border-gray-200 rounded-xl py-2 pl-9 pr-3 text-xs uppercase placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0052FF]"
+                    className="w-full bg-white border border-gray-300 rounded-xl py-2 pl-9 pr-3 text-xs uppercase placeholder-gray-400 font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#7A1F3D]"
                   />
-                  <Tag className="absolute left-3 top-2.5 w-3.5 h-3.5 text-gray-400" />
+                  <Tag className="absolute left-3 top-2.5 w-3.5 h-3.5 text-gray-500" />
                 </div>
                 <button
                   type="submit"
-                  className="bg-gray-900 hover:bg-black text-white text-xs font-bold px-4 py-2 rounded-xl transition"
+                  className="bg-gray-900 hover:bg-black text-white text-xs font-bold px-4 py-2 rounded-xl transition cursor-pointer"
                 >
                   প্রয়োগ
                 </button>
               </form>
               {appliedCoupon && (
-                <div className="flex items-center justify-between bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl text-xs font-bold">
+                <div className="flex items-center justify-between bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl text-xs font-bold border border-emerald-200">
                   <span>কুপন 적용: {appliedCoupon.code} (-৳{discountAmount})</span>
-                  <button onClick={() => setAppliedCoupon(null)} className="text-xs underline">বাদ দিন</button>
+                  <button onClick={() => setAppliedCoupon(null)} className="text-xs underline cursor-pointer">বাদ দিন</button>
                 </div>
               )}
-              {couponError && <p className="text-[11px] text-rose-600 font-semibold">{couponError}</p>}
+              {couponError && <p className="text-[11px] text-rose-700 font-bold">{couponError}</p>}
 
               {/* Subtotal & Totals */}
               <div className="space-y-1.5 pt-2 border-t border-gray-200 text-xs">
-                <div className="flex justify-between text-gray-600">
+                <div className="flex justify-between text-gray-700 font-medium">
                   <span>সাবটোটাল:</span>
-                  <span className="font-bold">৳{subtotal.toLocaleString()}</span>
+                  <span className="font-bold text-gray-900">৳{subtotal.toLocaleString()}</span>
                 </div>
                 {discountAmount > 0 && (
-                  <div className="flex justify-between text-emerald-600 font-semibold">
+                  <div className="flex justify-between text-emerald-700 font-bold">
                     <span>ডিসকাউন্ট:</span>
                     <span>-৳{discountAmount.toLocaleString()}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-gray-600">
+                <div className="flex justify-between text-gray-700 font-medium">
                   <span>ডেলিভারি চার্জ ({selectedZone?.name_bn}):</span>
-                  <span className="font-bold">৳{deliveryCharge}</span>
+                  <span className="font-bold text-gray-900">৳{deliveryCharge}</span>
                 </div>
                 <div className="flex justify-between text-sm font-black text-gray-900 pt-2 border-t border-gray-200">
                   <span>মোট প্রদেয় (Total):</span>
-                  <span className="text-[#0052FF] text-base">৳{total.toLocaleString()}</span>
+                  <span className="text-[#7A1F3D] text-base font-black">৳{total.toLocaleString()}</span>
                 </div>
               </div>
 
@@ -252,7 +252,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   onProceedToCheckout(discountAmount, appliedCoupon?.code || '');
                   onClose();
                 }}
-                className="w-full bg-[#0052FF] hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-[#0052FF]/30 transition active:scale-95"
+                className="w-full bg-[#7A1F3D] hover:bg-[#5E1630] text-white font-bold py-3.5 px-6 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-rose-950/20 transition active:scale-95 cursor-pointer"
               >
                 <span>অর্ডার কনফার্ম করুন</span>
                 <ArrowRight className="w-4 h-4" />

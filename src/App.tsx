@@ -47,9 +47,9 @@ const TimerDisplay = () => {
         <React.Fragment key={t.l}>
           <div className="flex min-w-[42px] flex-col items-center rounded-lg bg-white px-2 py-1 shadow-md">
             <span className="text-sm sm:text-base font-black leading-none" style={{ color: MAROON }}>{t.v}</span>
-            <span className="mt-0.5 text-[8px] sm:text-[9px] font-semibold leading-none text-gray-500">{t.l}</span>
+            <span className="mt-0.5 text-[8px] sm:text-[9px] font-bold leading-none text-gray-700">{t.l}</span>
           </div>
-          {i < 2 && <span className="text-sm font-black text-white/70">:</span>}
+          {i < 2 && <span className="text-sm font-black text-white/80">:</span>}
         </React.Fragment>
       ))}
     </div>
@@ -602,7 +602,7 @@ function MainApp() {
                       onClick={() => { setActiveTab('shop'); setSelectedCategory(cat.slug); }}
                       className="group flex w-[92px] shrink-0 snap-start flex-col items-center text-center cursor-pointer sm:w-[130px]"
                     >
-                      <div className="flex h-[84px] w-[84px] items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-white p-2.5 transition duration-300 group-hover:border-[#7A1F3D] group-hover:bg-[#E3EAFB] sm:h-[120px] sm:w-[120px] sm:p-4">
+                      <div className="flex h-[84px] w-[84px] items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-white p-2.5 transition duration-300 group-hover:border-[#7A1F3D] group-hover:bg-rose-50 sm:h-[120px] sm:w-[120px] sm:p-4">
                         {cat.image_url ? (
                           <img
                             src={cat.image_url}
@@ -770,11 +770,11 @@ function MainApp() {
               </div>
 
               <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-gray-500">সর্ট করুন:</span>
+                <span className="text-xs font-bold text-gray-700">সর্ট করুন:</span>
                 <select
                   value={sortBy}
                   onChange={(e: any) => setSortBy(e.target.value)}
-                  className="bg-white border border-gray-200 rounded-sm px-4 py-2 text-xs font-bold text-gray-800 focus:outline-none focus:border-[#7A1F3D]"
+                  className="bg-white border border-gray-300 rounded-sm px-4 py-2 text-xs font-bold text-gray-900 focus:outline-none focus:border-[#7A1F3D]"
                 >
                   <option value="default">ডিফল্ট</option>
                   <option value="price-low">মূল্য: কম থেকে বেশি</option>
@@ -811,7 +811,7 @@ function MainApp() {
                     key={product.id}
                     product={product}
                     onAddToCart={(p) => handleAddToCart(p)}
-                    onOrderNow={(p) => navigateToProduct(p)}
+                    onOrderNow={(p) => handleOrderNow(p)}
                     onSelectProduct={navigateToProduct}
                     onToggleWishlist={handleToggleWishlist}
                     isWishlisted={wishlist.includes(product.id)}

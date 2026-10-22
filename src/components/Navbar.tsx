@@ -193,12 +193,12 @@ export const Navbar: React.FC<NavbarProps> = ({
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  // Brand logo (আগের মতোই অপরিবর্তিত)
+  // Brand logo
   const Logo = ({ size = 'md' }: { size?: 'md' | 'lg' }) => (
     <span className="flex items-center gap-2 sm:gap-2.5 text-left">
-      <span className={`relative shrink-0 rounded-xl bg-[#B84040] flex items-center justify-center text-white shadow-md ${size === 'lg' ? 'w-11 h-11' : 'w-8 h-8 sm:w-10 sm:h-10'}`}>
+      <span className={`relative shrink-0 rounded-xl bg-[#7A1F3D] flex items-center justify-center text-white shadow-md ${size === 'lg' ? 'w-11 h-11' : 'w-8 h-8 sm:w-10 sm:h-10'}`}>
         <span className="text-lg sm:text-xl font-extrabold tracking-tighter leading-none">M</span>
-        <span className="absolute -bottom-1 -right-1 bg-[#7A1F3D] rounded-full p-0.5 text-white">
+        <span className="absolute -bottom-1 -right-1 bg-[#5E1630] rounded-full p-0.5 text-white">
           <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-white text-[#7A1F3D]" />
         </span>
       </span>
@@ -207,7 +207,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span className="text-[15px] sm:text-xl font-black text-gray-900 tracking-tight">Muba</span>
           <span className="text-[15px] sm:text-xl font-black text-[#7A1F3D] tracking-tight">Gadgets</span>
         </span>
-        <span className="hidden sm:flex items-center gap-1 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">
+        <span className="hidden sm:flex items-center gap-1 text-[10px] font-bold text-gray-700 uppercase tracking-widest">
           Verified Store <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
         </span>
       </span>
@@ -342,12 +342,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
-            <p className="px-3 pt-1 pb-1.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">ক্যাটাগরি</p>
+            <p className="px-3 pt-1 pb-1.5 text-[11px] font-extrabold text-gray-600 uppercase tracking-wider">ক্যাটাগরি</p>
 
             <button
               type="button"
               onClick={() => { goHome(); closeMenu(); }}
-              className={`w-full flex items-center justify-between py-3 px-3 rounded-xl text-sm font-semibold transition ${isHome ? 'bg-rose-50 text-[#7A1F3D] font-bold' : 'text-gray-800 hover:bg-gray-50'}`}
+              className={`w-full flex items-center justify-between py-3 px-3 rounded-xl text-sm font-semibold transition ${isHome ? 'bg-rose-50 text-[#7A1F3D] font-bold' : 'text-gray-900 hover:bg-gray-50'}`}
             >
               <span>হোম পেজ (Home)</span>
               <ChevronRight className="w-4 h-4 opacity-50" />
@@ -358,12 +358,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 type="button"
                 key={cat.id || cat.slug}
                 onClick={() => { goCategory(cat.slug); closeMenu(); }}
-                className={`w-full flex items-center justify-between gap-2 py-3 px-3 rounded-xl text-sm font-semibold transition ${selectedCategory === cat.slug ? 'bg-rose-50 text-[#7A1F3D] font-bold' : 'text-gray-800 hover:bg-gray-50'}`}
+                className={`w-full flex items-center justify-between gap-2 py-3 px-3 rounded-xl text-sm font-semibold transition ${selectedCategory === cat.slug ? 'bg-rose-50 text-[#7A1F3D] font-bold' : 'text-gray-900 hover:bg-gray-50'}`}
               >
                 <span className="min-w-0 text-left truncate">
                   {cat.name_bn || cat.name}
                   {cat.name_bn && cat.name && cat.name_bn !== cat.name && (
-                    <span className="ml-1.5 text-xs font-medium text-gray-400">({cat.name})</span>
+                    <span className="ml-1.5 text-xs font-semibold text-gray-500">({cat.name})</span>
                   )}
                 </span>
                 <ChevronRight className="w-4 h-4 opacity-50 shrink-0" />
@@ -371,7 +371,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             ))}
 
             <div className="h-px bg-gray-100 my-3" />
-            <p className="px-3 pb-1.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">দ্রুত লিংক</p>
+            <p className="px-3 pb-1.5 text-[11px] font-extrabold text-gray-600 uppercase tracking-wider">দ্রুত লিংক</p>
 
             <button
               type="button"

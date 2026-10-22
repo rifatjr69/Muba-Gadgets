@@ -2,6 +2,8 @@ import React from 'react';
 import { Heart, Star, ShoppingCart } from 'lucide-react';
 import { Product } from '../types';
 
+const THEME_MAROON = '#7A1F3D';
+
 export interface ProductCardProps {
   product: Product;
   onAddToCart: (product: Product) => void;
@@ -32,12 +34,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     : (product.badge || (product.is_featured ? 'NEW' : null));
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200/90 hover:border-gray-300 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group overflow-hidden relative h-full select-none">
+    <div className="bg-white rounded-xl border border-gray-200/90 hover:border-[#7A1F3D]/40 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group overflow-hidden relative h-full select-none">
       
       {/* Top Floating Badges */}
       <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 items-start pointer-events-none">
         {badgeText && (
-          <span className="bg-[#B84040] text-white text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-[3px] uppercase tracking-wider shadow-sm">
+          <span 
+            className="text-white text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-[3px] uppercase tracking-wider shadow-sm"
+            style={{ backgroundColor: THEME_MAROON }}
+          >
             {badgeText}
           </span>
         )}
@@ -52,15 +57,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         }}
         className={`absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 border shadow-sm cursor-pointer ${
           isWishlisted
-            ? 'bg-rose-50 text-[#B84040] border-[#B84040]/30'
-            : 'bg-white/95 text-gray-400 hover:text-[#B84040] hover:bg-white border-gray-200/90'
+            ? 'bg-rose-50 text-[#7A1F3D] border-[#7A1F3D]/30'
+            : 'bg-white/95 text-gray-500 hover:text-[#7A1F3D] hover:bg-white border-gray-200/90'
         }`}
         title="Wishlist"
         aria-label="Wishlist"
       >
         <Heart 
           className={`w-4 h-4 transition-transform duration-200 active:scale-125 ${
-            isWishlisted ? 'fill-[#B84040] text-[#B84040]' : ''
+            isWishlisted ? 'fill-[#7A1F3D] text-[#7A1F3D]' : ''
           }`} 
         />
       </button>
@@ -84,18 +89,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       {/* Content Area */}
       <div className="p-3 sm:p-3.5 flex-1 flex flex-col justify-between">
         <div>
-          {/* Product Title */}
+          {/* Product Title - Solid high contrast dark text */}
           <h3 
             onClick={() => onSelectProduct(product)}
             title={product.name}
-            className="text-xs sm:text-[13px] font-medium text-gray-800 hover:text-gray-950 line-clamp-2 leading-snug cursor-pointer transition-colors min-h-[2rem] sm:min-h-[2.25rem] mb-1"
+            className="text-xs sm:text-[13px] font-bold text-gray-900 hover:text-[#7A1F3D] line-clamp-2 leading-snug cursor-pointer transition-colors min-h-[2rem] sm:min-h-[2.25rem] mb-1"
           >
             {product.name}
           </h3>
 
           {/* Star Rating and Review Count */}
-          <div className="flex items-center gap-1 mb-2">
-            <div className="flex items-center text-amber-400 gap-0.5">
+          <div className="flex items-center gap-1.5 mb-2">
+            <div className="flex items-center text-amber-500 gap-0.5">
               {[1, 2, 3, 4, 5].map((star) => {
                 const isFilled = (product.review_count || 0) > 0 && star <= Math.round(product.rating || 0);
                 return (
@@ -103,25 +108,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                     key={star}
                     className={`w-3 h-3 ${
                       isFilled
-                        ? 'fill-amber-400 text-amber-400'
+                        ? 'fill-amber-500 text-amber-500'
                         : 'text-amber-400 fill-transparent stroke-[1.5]'
                     }`}
                   />
                 );
               })}
             </div>
-            <span className="text-[11px] text-gray-400 font-normal">
+            <span className="text-[11px] text-gray-600 font-semibold">
               ({product.review_count || 0})
             </span>
           </div>
 
           {/* Price Row */}
           <div className="flex items-baseline gap-2">
-            <span className="text-sm sm:text-base font-bold text-gray-900 tracking-tight">
+            <span className="text-sm sm:text-base font-black text-gray-900 tracking-tight">
               ৳{product.price.toLocaleString()}
             </span>
             {product.old_price && product.old_price > product.price && (
-              <span className="text-xs text-gray-400 line-through font-normal">
+              <span className="text-xs text-gray-500 line-through font-semibold">
                 ৳{product.old_price.toLocaleString()}
               </span>
             )}
@@ -138,7 +143,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 onOrderNow(product);
               }
             }}
-            className="flex-1 py-1.5 sm:py-2 px-2.5 rounded border border-[#B84040] text-[#B84040] hover:bg-[#B84040] hover:text-white active:scale-[0.98] transition-all duration-200 text-[11px] sm:text-xs font-semibold tracking-wider uppercase flex items-center justify-center cursor-pointer select-none"
+            className="flex-1 py-1.5 sm:py-2 px-2.5 rounded border text-white active:scale-[0.98] transition-all duration-200 text-[11px] sm:text-xs font-bold tracking-wider uppercase flex items-center justify-center cursor-pointer select-none shadow-xs hover:opacity-90"
+            style={{ backgroundColor: THEME_MAROON, borderColor: THEME_MAROON }}
           >
             BUY NOW
           </button>
@@ -149,7 +155,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               e.stopPropagation();
               onAddToCart(product);
             }}
-            className="w-8.5 h-7.5 sm:w-10 sm:h-8.5 rounded border border-[#B84040] text-[#B84040] hover:bg-[#B84040] hover:text-white active:scale-[0.98] transition-all duration-200 flex items-center justify-center shrink-0 cursor-pointer"
+            className="w-8.5 h-7.5 sm:w-10 sm:h-8.5 rounded border border-[#7A1F3D] text-[#7A1F3D] hover:bg-rose-50 active:scale-[0.98] transition-all duration-200 flex items-center justify-center shrink-0 cursor-pointer"
             title="Add to Cart"
             aria-label="Add to Cart"
           >

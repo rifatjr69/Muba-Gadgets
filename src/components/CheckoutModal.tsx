@@ -214,12 +214,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
                     <ShieldCheck className="w-6 h-6" style={{ color: '#7A1F43' }} /> চেকআউট ও ডেলিভারি তথ্য
                   </h2>
-                  <p className="text-xs text-gray-500 mt-1">আপনার সঠিক নাম, মোবাইল নম্বর ও ঠিকানা লিখে অর্ডার কনফার্ম করুন।</p>
+                  <p className="text-xs text-gray-600 mt-1 font-medium">আপনার সঠিক নাম, মোবাইল নম্বর ও ঠিকানা লিখে অর্ডার কনফার্ম করুন।</p>
                 </div>
 
                 <form onSubmit={handleSubmitOrder} className="space-y-4">
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
+                    <label className="text-xs font-bold text-gray-800 flex items-center gap-1">
                       <User className="w-3.5 h-3.5" style={{ color: '#7A1F43' }} /> আপনার পূর্ণ নাম <span className="text-rose-500">*</span>
                     </label>
                     <input
@@ -228,12 +228,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       placeholder="যেমন: রাশেদ খান"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#7A1F43] focus:bg-white transition"
+                      className="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 text-xs font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-[#7A1F43] focus:bg-white transition"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
+                    <label className="text-xs font-bold text-gray-800 flex items-center gap-1">
                       <Phone className="w-3.5 h-3.5" style={{ color: '#7A1F43' }} /> মোবাইল নম্বর (১১ ডিজিট) <span className="text-rose-500">*</span>
                     </label>
                     <input
@@ -242,12 +242,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       placeholder="যেমন: 01712345678"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#7A1F43] focus:bg-white transition"
+                      className="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 text-xs font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-[#7A1F43] focus:bg-white transition"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
+                    <label className="text-xs font-bold text-gray-800 flex items-center gap-1">
                       <MapPin className="w-3.5 h-3.5" style={{ color: '#7A1F43' }} /> সম্পূর্ণ ঠিকানা (বাসা/রোড/এলাকা/থানা) <span className="text-rose-500">*</span>
                     </label>
                     <textarea
@@ -256,12 +256,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       placeholder="যেমন: বাসা ১২, রোড ৪, ধানমন্ডি, ঢাকা"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#7A1F43] focus:bg-white transition resize-none"
+                      className="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 text-xs font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-[#7A1F43] focus:bg-white transition resize-none"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
+                    <label className="text-xs font-bold text-gray-800 flex items-center gap-1">
                       <Truck className="w-3.5 h-3.5" style={{ color: '#7A1F43' }} /> ডেলিভারি অঞ্চল নির্বাচন করুন:
                     </label>
                     <div className="grid grid-cols-2 gap-2">
@@ -273,14 +273,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                               key={zone.id}
                               type="button"
                               onClick={() => setSelectedZone && setSelectedZone(zone)}
-                              className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
+                              className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between cursor-pointer ${
                                 isSelected 
                                   ? 'border-[#7A1F43] bg-rose-50/70 shadow-sm ring-2 ring-[#7A1F43]/20' 
                                   : 'border-gray-200 bg-white hover:bg-gray-50'
                               }`}
                             >
                               <div className="flex items-center justify-between w-full">
-                                <span className={`text-xs font-bold truncate ${isSelected ? 'text-[#7A1F43]' : 'text-gray-800'}`}>
+                                <span className={`text-xs font-bold truncate ${isSelected ? 'text-[#7A1F43]' : 'text-gray-900'}`}>
                                   {zone.name_bn}
                                 </span>
                                 <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 ${isSelected ? 'border-[#7A1F43] bg-[#7A1F43]' : 'border-gray-300'}`}>
@@ -288,8 +288,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                                 </span>
                               </div>
                               <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-gray-100 text-[11px]">
-                                <span className="text-gray-500">{zone.estimated_days}</span>
-                                <span className="font-extrabold" style={{ color: '#7A1F43' }}>৳{zone.charge}</span>
+                                <span className="text-gray-600 font-medium">{zone.estimated_days}</span>
+                                <span className="font-black" style={{ color: '#7A1F43' }}>৳{zone.charge}</span>
                               </div>
                             </button>
                           );
@@ -307,8 +307,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             <div className="md:sticky md:top-20 h-fit space-y-6">
                 {/* Payment Method */}
                 <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-700 block">পেমেন্ট মেথড:</label>
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-3 rounded-xl text-xs font-bold flex items-center gap-2">
+                    <label className="text-xs font-bold text-gray-800 block">পেমেন্ট মেথড:</label>
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 p-3 rounded-xl text-xs font-bold flex items-center gap-2">
                         <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
                         Cash on Delivery (পণ্য হাতে পেয়ে ক্যাশ পরিশোধ)
                     </div>
@@ -316,30 +316,30 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
                 {/* Order Summary box */}
                 <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-1 text-xs">
-                    <div className="flex justify-between text-gray-600">
+                    <div className="flex justify-between text-gray-700 font-medium">
                         <span>সাবটোটাল:</span>
-                        <span>৳{subtotal.toLocaleString()}</span>
+                        <span className="font-bold text-gray-900">৳{subtotal.toLocaleString()}</span>
                     </div>
                     {discountAmount > 0 && (
-                        <div className="flex justify-between text-emerald-600 font-semibold">
+                        <div className="flex justify-between text-emerald-700 font-bold">
                         <span>ডিসকাউন্ট:</span>
                         <span>-৳{discountAmount.toLocaleString()}</span>
                         </div>
                     )}
-                    <div className="flex justify-between text-gray-600">
+                    <div className="flex justify-between text-gray-700 font-medium">
                         <span>ডেলিভারি চার্জ:</span>
-                        <span>৳{deliveryCharge}</span>
+                        <span className="font-bold text-gray-900">৳{deliveryCharge}</span>
                     </div>
                     <div className="flex justify-between font-black text-sm text-gray-900 pt-2 border-t border-gray-200">
                         <span>সর্বমোট প্রদেয়:</span>
-                        <span className="text-base" style={{ color: '#7A1F43' }}>৳{total.toLocaleString()}</span>
+                        <span className="text-base font-black" style={{ color: '#7A1F43' }}>৳{total.toLocaleString()}</span>
                     </div>
                 </div>
 
                 <button
                     onClick={handleSubmitOrder}
                     disabled={loading}
-                    className="w-full text-white font-bold py-3.5 px-6 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition disabled:opacity-50"
+                    className="w-full text-white font-bold py-3.5 px-6 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-rose-950/20 transition disabled:opacity-50 cursor-pointer"
                     style={{ background: '#7A1F43' }}
                 >
                     {loading ? (

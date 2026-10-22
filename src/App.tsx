@@ -24,10 +24,11 @@ const PINK_SOFT = '#FCE8EC';
 
 const TimerDisplay = () => {
   const [timeLeft, setTimeLeft] = useState(12 * 3600 + 45 * 60 + 30);
+  const duration = 12 * 3600 + 45 * 60 + 30;
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 12 * 3600 + 45 * 60 + 30));
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : duration));
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -244,6 +245,13 @@ function MainApp() {
     setView('admin');
     setSelectedProduct(null);
     window.history.pushState({ view: 'admin', tab: savedTab }, '', `/admin?tab=${savedTab}`);
+  };
+
+  // Show All Products: shop পেজে গিয়ে সব প্রোডাক্ট দেখায়
+  const handleShowAllProducts = () => {
+    setActiveTab('shop');
+    setSelectedCategory('all');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Modals state
@@ -630,16 +638,7 @@ function MainApp() {
               </div>
 
               <div className="mt-6 flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => { setActiveTab('shop'); setSelectedCategory('all'); }}
-                  className="flex w-full max-w-sm items-center justify-center gap-2 rounded-sm border bg-white px-6 py-3.5 text-xs font-bold uppercase tracking-[0.15em] transition hover:text-white sm:text-sm"
-                  style={{ borderColor: MAROON, color: MAROON }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = MAROON; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; }}
-                >
-                  View All Categories <ArrowRight className="h-4 w-4" />
-                </button>
+                
               </div>
             </section>
 
@@ -692,7 +691,7 @@ function MainApp() {
                           <ProductCard
                             product={product}
                             onAddToCart={(p) => handleAddToCart(p)}
-                            onOrderNow={(p) => navigateToProduct(p)}
+                            onOrderNow={(p) => handleOrderNow(p)}
                             onSelectProduct={navigateToProduct}
                             onToggleWishlist={handleToggleWishlist}
                             isWishlisted={wishlist.includes(product.id)}
@@ -718,7 +717,7 @@ function MainApp() {
                   Featured Products
                 </h2>
                 <button
-                  onClick={() => { setActiveTab('shop'); setSelectedCategory('all'); }}
+                  onClick={handleShowAllProducts}
                   className="flex shrink-0 items-center gap-1 text-[11px] sm:text-xs font-bold uppercase tracking-wider hover:underline"
                   style={{ color: MAROON }}
                 >
@@ -732,12 +731,26 @@ function MainApp() {
                     key={product.id}
                     product={product}
                     onAddToCart={(p) => handleAddToCart(p)}
-                    onOrderNow={(p) => navigateToProduct(p)}
+                    onOrderNow={(p) => handleOrderNow(p)}
                     onSelectProduct={navigateToProduct}
                     onToggleWishlist={handleToggleWishlist}
                     isWishlisted={wishlist.includes(product.id)}
                   />
                 ))}
+              </div>
+
+              {/* Show All Products button (নতুন) */}
+              <div className="mt-8 flex justify-center">
+                <button
+                  type="button"
+                  onClick={handleShowAllProducts}
+                  className="flex w-full max-w-sm items-center justify-center gap-2 rounded-sm border bg-white px-6 py-3.5 text-xs font-bold uppercase tracking-[0.15em] transition hover:text-white sm:text-sm"
+                  style={{ borderColor: MAROON, color: MAROON }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = MAROON; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; }}
+                >
+                  Show All Products <ArrowRight className="h-4 w-4" />
+                </button>
               </div>
             </section>
 

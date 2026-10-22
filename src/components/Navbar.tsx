@@ -22,7 +22,7 @@ interface NavbarProps {
   setActiveTab: (tab: 'home' | 'shop') => void;
   selectedCategory: string;
   setSelectedCategory: (cat: string) => void;
-  user: any;
+  user?: any;
   isAdmin: boolean;
   onLogout?: () => void;
 }
